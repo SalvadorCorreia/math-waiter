@@ -12,10 +12,11 @@ Parent: [../AGENTS.md](../AGENTS.md). Per-OS guides: [linux/AGENTS.md](linux/AGE
 
 1. **Browser choice:** the default browser if it is Chromium-based (launched with `--app`) or Firefox-based (`-no-remote -profile`); otherwise the first installed one; otherwise open the game once per login/boot as a plain tab (it then cannot be closed or refocused).
 2. **Dedicated profile per browser**, in persistent per-user storage (not `/tmp`), so closing the game never touches the user's own browser and the leaderboard survives.
-3. **Find the game by its profile path** on the process command line, not by a saved PID (wrappers and Firefox's Windows launcher change PIDs).
-4. **start:** remember the focused window/app (skip it if it is the game), then bring the game to front or launch it detached.
-5. **pause:** return focus to the remembered window. The game pauses itself on blur.
-6. **stop:** close the game gracefully (window-close request / Cmd+Q / `CloseMainWindow`) so `localStorage` is flushed; force-kill only after 3 s. Then restore focus.
-7. **Silent:** no stdout, exit 0.
+3. **Open a fixed copy of the game**, refreshed from `game/game.html` on every launch, in the per-user state folder (`<state>/game/game.html`). The browser keys `localStorage` by file path and the plugin folder changes on every update, so opening the plugin's own file would wipe the leaderboard.
+4. **Find the game by its profile path** on the process command line, not by a saved PID (wrappers and Firefox's Windows launcher change PIDs).
+5. **start:** remember the focused window/app (skip it if it is the game), then bring the game to front or launch it detached.
+6. **pause:** return focus to the remembered window. The game pauses itself on blur.
+7. **stop:** close the game gracefully (window-close request / Cmd+Q / `CloseMainWindow`) so `localStorage` is flushed; force-kill only after 3 s. Then restore focus.
+8. **Silent:** no stdout, exit 0.
 
 Firefox does not shut down cleanly on SIGTERM, which loses the last progress; always prefer the graceful close.

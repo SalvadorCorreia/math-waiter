@@ -31,7 +31,6 @@ url_encode() {
     done
     printf '%s' "$out"
 }
-GAME_URL="file://$(url_encode "$GAME_DIR/game.html")"
 
 # "chromium" (supports --app), "firefox", or nothing for browsers the game cannot control.
 browser_kind() {
@@ -96,8 +95,25 @@ case "$BROWSER" in
     *)       PROFILE_DIR="$STATE_DIR/profile-$(basename "$BROWSER")" ;;
 esac
 
+# The browser stores the leaderboard and saved run per file:// path, and the plugin's own
+# folder changes with every plugin update. So the game is copied to a fixed per-user folder
+# and always opened from there. Snap browsers cannot read hidden folders in $HOME, so they
+# get the copy inside their snap directory.
+case "$BROWSER" in
+    /snap/*) GAME_COPY_DIR="$HOME/snap/$(basename "$BROWSER")/common/math-waiter-game" ;;
+    *)       GAME_COPY_DIR="$STATE_DIR/game" ;;
+esac
+GAME_URL="file://$(url_encode "$GAME_COPY_DIR/game.html")"
+
+# Refresh the fixed copy, so plugin updates still reach the game.
+install_game() {
+    mkdir -p "$GAME_COPY_DIR"
+    cp "$GAME_DIR/game.html" "$GAME_COPY_DIR/game.html"
+}
+
 # Start the game window detached, so the hook returns at once and the game outlives it.
 launch_game() {
+    install_game
     mkdir -p "$PROFILE_DIR"
     case "$KIND" in
         chromium)

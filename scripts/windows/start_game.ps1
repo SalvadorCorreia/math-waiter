@@ -8,6 +8,7 @@ if (-not $Browser) {
     $Boot = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
     if (-not (Test-Path $Marker) -or (Get-Item $Marker).LastWriteTime -lt $Boot) {
         Set-Content $Marker ''
+        Install-Game
         Start-Process $GameUrl
     }
     exit 0

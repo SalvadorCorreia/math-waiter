@@ -6,9 +6,14 @@
 $ErrorActionPreference = 'SilentlyContinue'
 
 $ScriptsDir = Split-Path $PSScriptRoot
-# AbsoluteUri percent-encodes spaces; Start-Process would otherwise split the URL at them.
-$GameUrl    = ([System.Uri](Resolve-Path (Join-Path $ScriptsDir '..\game\game.html')).Path).AbsoluteUri
+$GameSource = (Resolve-Path (Join-Path $ScriptsDir '..\game\game.html')).Path
 $StateDir   = Join-Path $env:LOCALAPPDATA 'math-waiter'
+# The browser stores the leaderboard and saved run per file:// path, and the plugin's own
+# folder changes with every plugin update. So the game is copied to a fixed per-user folder
+# and always opened from there.
+$GameCopy   = Join-Path $StateDir 'game\game.html'
+# AbsoluteUri percent-encodes spaces; Start-Process would otherwise split the URL at them.
+$GameUrl    = ([System.Uri]$GameCopy).AbsoluteUri
 $FocusFile  = Join-Path $env:TEMP 'math_waiter.focus'
 
 # "chromium" (supports --app), "firefox", or nothing for browsers the game cannot control.
@@ -49,7 +54,14 @@ $Kind    = if ($Browser) { Get-BrowserKind $Browser }
 # Each browser gets its own profile, since browsers cannot share one.
 $ProfileDir = if ($Browser) { Join-Path $StateDir ('profile-' + [IO.Path]::GetFileNameWithoutExtension($Browser)) }
 
+# Refresh the fixed copy, so plugin updates still reach the game.
+function Install-Game {
+    New-Item -ItemType Directory -Force (Split-Path $GameCopy) | Out-Null
+    Copy-Item $GameSource $GameCopy -Force
+}
+
 function Start-Game {
+    Install-Game
     New-Item -ItemType Directory -Force $ProfileDir | Out-Null
     if ($Kind -eq 'chromium') {
         $Arguments = @(

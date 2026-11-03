@@ -24,7 +24,17 @@ url_encode() {
     done
     printf '%s' "$out"
 }
-GAME_URL="file://$(url_encode "$GAME_DIR/game.html")"
+# The browser stores the leaderboard and saved run per file:// path, and the plugin's own
+# folder changes with every plugin update. So the game is copied to a fixed per-user folder
+# and always opened from there.
+GAME_COPY_DIR="$STATE_DIR/game"
+GAME_URL="file://$(url_encode "$GAME_COPY_DIR/game.html")"
+
+# Refresh the fixed copy, so plugin updates still reach the game.
+install_game() {
+    mkdir -p "$GAME_COPY_DIR"
+    cp "$GAME_DIR/game.html" "$GAME_COPY_DIR/game.html"
+}
 
 plist_value() {
     /usr/libexec/PlistBuddy -c "Print :$2" "$1/Contents/Info.plist" 2> /dev/null
@@ -75,6 +85,7 @@ PROFILE_DIR=""
 
 # Start the game window in the background, so the hook returns at once.
 launch_game() {
+    install_game
     mkdir -p "$PROFILE_DIR"
     case "$KIND" in
         chromium)

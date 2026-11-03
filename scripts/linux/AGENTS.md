@@ -8,6 +8,7 @@ Bash. `common.sh` is sourced by `start_game.sh`, `pause_game.sh` and `stop_game.
 
 - **Default browser:** `xdg-settings get default-web-browser` (fallback `xdg-mime query default x-scheme-handler/https`), then the `Exec=` line of that `.desktop` file. Flatpak browsers are skipped.
 - **Profiles:** `${XDG_STATE_HOME:-~/.local/state}/math-waiter/profile-<browser>`; snap browsers use `~/snap/<name>/common/math-waiter-profile` (snaps cannot write hidden dirs in `$HOME`).
+- **Game copy:** `<state>/game/game.html` (snap: `~/snap/<name>/common/math-waiter-game/`), refreshed by `install_game()` before each launch.
 - **Runtime state** (focus file, fallback marker): `$XDG_RUNTIME_DIR/math-waiter`, else `/tmp/math-waiter-<uid>`.
 - **Launch:** `setsid -f` so the hook returns and the game outlives it.
 - **Game PID:** `pgrep -o -f` on `--user-data-dir=<profile>` (Chromium) or `-profile <profile>` (Firefox).
