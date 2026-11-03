@@ -1,0 +1,9 @@
+/* Game window only: hide tabs, address bar, bookmarks and sidebar so it looks like an app window.
+   The start scripts copy this file into the game's dedicated Firefox profile. */
+#TabsToolbar,
+#nav-bar,
+#PersonalToolbar,
+#sidebar-main,
+#sidebar-box {
+    visibility: collapse !important;
+}

@@ -265,6 +265,20 @@
         heartsHtml += (i < lives) ? heartFull : heartEmpty;
       }
       document.getElementById('hearts-container').innerHTML = heartsHtml;
+      saveProgress();
+    }
+
+    // The window is closed every time Claude finishes, so keep the run in localStorage.
+    function saveProgress() {
+      localStorage.setItem('mathProgress', JSON.stringify({ score: score, lives: lives }));
+    }
+
+    function loadProgress() {
+      const saved = JSON.parse(localStorage.getItem('mathProgress'));
+      if (saved && saved.lives > 0) {
+        score = saved.score;
+        lives = saved.lives;
+      }
     }
 
     function setProgress(percent) {
@@ -280,7 +294,7 @@
       setProgress(100);
       
       timerInterval = setInterval(() => {
-        if (isPaused) return;
+        if (isPaused || !document.hasFocus()) return;
         timeLeft -= 0.1;
         setProgress((timeLeft / totalTime) * 100);
         
@@ -328,6 +342,7 @@
     function endGame(isWin) {
       clearInterval(timerInterval);
       saveScore();
+      localStorage.removeItem('mathProgress');
       renderLeaderboard();
       
       const title = document.getElementById('endTitle');
@@ -444,6 +459,7 @@
       }
     });
 
+    loadProgress();
     generateQuestion();
   </script>
 </body>
