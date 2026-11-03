@@ -31,20 +31,20 @@ Math Waiter is a Claude Code plugin. Its hooks run in every Claude Code session:
 From GitHub, inside Claude Code:
 
 ```
-/plugin marketplace add SalvadorCorreia/claude-code-math-waiter
+/plugin marketplace add SalvadorCorreia/math-waiter
 /plugin install math-waiter@math-waiter
 ```
 
 From a local copy of this folder, in a shell:
 
 ```bash
-claude plugin marketplace add /path/to/claude-code-math-waiter
+claude plugin marketplace add /path/to/math-waiter
 claude plugin install math-waiter@math-waiter
 ```
 
 Then start a new Claude Code session. Hooks load when a session starts, so sessions that are already open won't show the game.
 
-To try it for one session without installing: `claude --plugin-dir /path/to/claude-code-math-waiter`.
+To try it for one session without installing: `claude --plugin-dir /path/to/math-waiter`.
 
 To turn it off: `/plugin disable math-waiter@math-waiter`, or `/plugin uninstall math-waiter@math-waiter` to remove it.
 
