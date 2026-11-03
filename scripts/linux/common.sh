@@ -11,11 +11,11 @@
 
 SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GAME_DIR="$(cd "$SCRIPTS_DIR/../game" && pwd)"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/claude-math-waiter"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/math-waiter"
 if [ -n "$XDG_RUNTIME_DIR" ]; then
-    RUN_DIR="$XDG_RUNTIME_DIR/claude-math-waiter"
+    RUN_DIR="$XDG_RUNTIME_DIR/math-waiter"
 else
-    RUN_DIR="/tmp/claude-math-waiter-$(id -u)"
+    RUN_DIR="/tmp/math-waiter-$(id -u)"
 fi
 FOCUS_FILE="$RUN_DIR/focus"
 
@@ -92,7 +92,7 @@ fi
 # get a folder inside their own snap directory instead.
 case "$BROWSER" in
     "")      PROFILE_DIR="" ;;
-    /snap/*) PROFILE_DIR="$HOME/snap/$(basename "$BROWSER")/common/claude-math-waiter-profile" ;;
+    /snap/*) PROFILE_DIR="$HOME/snap/$(basename "$BROWSER")/common/math-waiter-profile" ;;
     *)       PROFILE_DIR="$STATE_DIR/profile-$(basename "$BROWSER")" ;;
 esac
 

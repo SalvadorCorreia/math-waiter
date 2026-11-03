@@ -8,8 +8,8 @@ $ErrorActionPreference = 'SilentlyContinue'
 $ScriptsDir = Split-Path $PSScriptRoot
 # AbsoluteUri percent-encodes spaces; Start-Process would otherwise split the URL at them.
 $GameUrl    = ([System.Uri](Resolve-Path (Join-Path $ScriptsDir '..\game\game.html')).Path).AbsoluteUri
-$StateDir   = Join-Path $env:LOCALAPPDATA 'claude-math-waiter'
-$FocusFile  = Join-Path $env:TEMP 'claude_math_game.focus'
+$StateDir   = Join-Path $env:LOCALAPPDATA 'math-waiter'
+$FocusFile  = Join-Path $env:TEMP 'math_waiter.focus'
 
 # "chromium" (supports --app), "firefox", or nothing for browsers the game cannot control.
 function Get-BrowserKind($Exe) {

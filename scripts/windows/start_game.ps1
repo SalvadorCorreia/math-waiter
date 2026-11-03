@@ -4,7 +4,7 @@
 if (-not $Browser) {
     # No browser the scripts can control: open the game once per boot as a normal tab in the
     # default browser. It cannot be closed or refocused automatically.
-    $Marker = Join-Path $env:TEMP 'claude_math_game.fallback'
+    $Marker = Join-Path $env:TEMP 'math_waiter.fallback'
     $Boot = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
     if (-not (Test-Path $Marker) -or (Get-Item $Marker).LastWriteTime -lt $Boot) {
         Set-Content $Marker ''

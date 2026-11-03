@@ -7,8 +7,8 @@ Bash. `common.sh` is sourced by `start_game.sh`, `pause_game.sh` and `stop_game.
 ## Specifics
 
 - **Default browser:** `xdg-settings get default-web-browser` (fallback `xdg-mime query default x-scheme-handler/https`), then the `Exec=` line of that `.desktop` file. Flatpak browsers are skipped.
-- **Profiles:** `${XDG_STATE_HOME:-~/.local/state}/claude-math-waiter/profile-<browser>`; snap browsers use `~/snap/<name>/common/claude-math-waiter-profile` (snaps cannot write hidden dirs in `$HOME`).
-- **Runtime state** (focus file, fallback marker): `$XDG_RUNTIME_DIR/claude-math-waiter`, else `/tmp/claude-math-waiter-<uid>`.
+- **Profiles:** `${XDG_STATE_HOME:-~/.local/state}/math-waiter/profile-<browser>`; snap browsers use `~/snap/<name>/common/math-waiter-profile` (snaps cannot write hidden dirs in `$HOME`).
+- **Runtime state** (focus file, fallback marker): `$XDG_RUNTIME_DIR/math-waiter`, else `/tmp/math-waiter-<uid>`.
 - **Launch:** `setsid -f` so the hook returns and the game outlives it.
 - **Game PID:** `pgrep -o -f` on `--user-data-dir=<profile>` (Chromium) or `-profile <profile>` (Firefox).
 - **Focus/close backends**, picked by `focus_backend()`: Hyprland (`hyprctl`), Sway (`swaymsg` + `jq`), X11 (`xdotool`, or `wmctrl` + `xprop`). None on GNOME/KDE Wayland: focus switching is skipped and close falls back to SIGTERM.

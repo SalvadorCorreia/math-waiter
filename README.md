@@ -54,9 +54,9 @@ Updates ship through the same marketplace. Bump `version` in `.claude-plugin/plu
 
 ### Per-platform notes
 
-* **Windows:** needs [Git for Windows](https://git-scm.com/download/win), which Claude Code uses to run hooks. Without it Claude Code runs hooks in PowerShell, and the game does not start. Profiles live in `%LOCALAPPDATA%\claude-math-waiter`.
-* **macOS:** the first run may ask for permission to control "System Events". Click **Allow**. If you dismissed it, enable it in System Settings → Privacy & Security → Automation / Accessibility. Profiles live in `~/Library/Application Support/claude-math-waiter`.
-* **Linux:** profiles live in `~/.local/state/claude-math-waiter`, or inside the browser's snap folder for snap browsers. Linux has no standard way to switch or close windows, so focus switching works on Hyprland, Sway (needs `jq`) and X11 (needs `xdotool`, or `wmctrl` + `xprop`). On other desktops, such as GNOME or KDE on Wayland, the game still opens, pauses on blur and closes; you switch windows yourself. There, a Firefox game window is closed with `SIGTERM`, which can lose the last few seconds of progress. Flatpak browsers are not supported.
+* **Windows:** needs [Git for Windows](https://git-scm.com/download/win), which Claude Code uses to run hooks. Without it Claude Code runs hooks in PowerShell, and the game does not start. Profiles live in `%LOCALAPPDATA%\math-waiter`.
+* **macOS:** the first run may ask for permission to control "System Events". Click **Allow**. If you dismissed it, enable it in System Settings → Privacy & Security → Automation / Accessibility. Profiles live in `~/Library/Application Support/math-waiter`.
+* **Linux:** profiles live in `~/.local/state/math-waiter`, or inside the browser's snap folder for snap browsers. Linux has no standard way to switch or close windows, so focus switching works on Hyprland, Sway (needs `jq`) and X11 (needs `xdotool`, or `wmctrl` + `xprop`). On other desktops, such as GNOME or KDE on Wayland, the game still opens, pauses on blur and closes; you switch windows yourself. There, a Firefox game window is closed with `SIGTERM`, which can lose the last few seconds of progress. Flatpak browsers are not supported.
 
 ## Project layout
 

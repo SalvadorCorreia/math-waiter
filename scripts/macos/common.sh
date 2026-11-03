@@ -8,8 +8,8 @@
 
 SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GAME_DIR="$(cd "$SCRIPTS_DIR/../game" && pwd)"
-STATE_DIR="$HOME/Library/Application Support/claude-math-waiter"
-RUN_DIR="${TMPDIR:-/tmp/}claude-math-waiter"
+STATE_DIR="$HOME/Library/Application Support/math-waiter"
+RUN_DIR="${TMPDIR:-/tmp/}math-waiter"
 FOCUS_FILE="$RUN_DIR/focus"
 
 # Percent-encode everything except unreserved characters and '/', byte by byte.
