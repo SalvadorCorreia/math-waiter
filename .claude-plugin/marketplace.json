@@ -1,0 +1,13 @@
+{
+  "name": "math-waiter",
+  "description": "Math Waiter: a math game to play while Claude Code works.",
+  "owner": {
+    "name": "Salvador Correia"
+  },
+  "plugins": [
+    {
+      "name": "math-waiter",
+      "source": "./"
+    }
+  ]
+}
