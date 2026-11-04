@@ -20,7 +20,8 @@ A math game that opens while an AI coding agent works, steps aside when the agen
 - **Commits.** Never add `Co-Authored-By`, "Generated with Claude Code" or any AI attribution to commits or PRs. Conventional Commits style (`feat:`, `fix:`, `chore:`, `refactor:`).
 - **Hooks must be silent and fast.** `UserPromptSubmit` stdout is injected into the agent's context, so scripts print nothing; the game launches detached so the hook returns immediately (hook timeout is 15 s).
 - **Average laptop, not one machine.** Changes must degrade gracefully on Windows, macOS and any Linux desktop; feature-detect tools instead of assuming them.
-- **Releases.** Users only receive an update when `version` in `.claude-plugin/plugin.json` changes.
+- **Branches.** Work on `dev`. Never push to `main` until the change is ready for users: a push triggers a webhook and the plugin directory scans that commit as a new version.
+- **Releases.** Merge `dev` into `main` with a higher `version` in `.claude-plugin/plugin.json`. Marketplace users only receive an update when `version` changes.
 
 ## Check your work
 
