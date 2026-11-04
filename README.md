@@ -12,6 +12,16 @@ A math game that keeps you busy while Claude Code works. Claude Code hooks open 
 
 The game runs in its own window with a separate browser profile, so closing it never touches your normal browser windows. The profile also keeps the leaderboard.
 
+## What it does on your machine
+
+The hooks run as shell commands with your user permissions, so here is everything they do:
+
+* **Network and data:** neither the game nor the scripts contact any server, and they do not read your prompts or conversation. Scores stay in the game's browser profile. The browser itself may still make its own background requests, such as update checks.
+* **Programs started:** your browser, with a dedicated profile. On Windows, PowerShell runs the scripts with `-ExecutionPolicy Bypass`, because script execution is off by default. If no supported browser is found, the game opens as a normal tab, with a desktop notification.
+* **Window control:** the scripts read which window is focused and later return focus to it, using `hyprctl`, `swaymsg`, `xdotool` or `wmctrl` on Linux, `osascript` (System Events) on macOS and Win32 calls on Windows.
+* **Closing the game:** the scripts ask the game window to close, and force-kill it after 3 seconds if it is still open. They find it by its profile path, so other browser windows are not affected.
+* **Files written:** a copy of the game, the browser profile (including Firefox settings from `scripts/firefox/`) and a small record of the focused window, all in the per-user folders listed under [Per-platform notes](#per-platform-notes) or in temporary storage.
+
 `start_game` remembers the window you submitted the prompt from, and `pause_game` / `stop_game` return focus to it.
 
 ## Browser
@@ -61,7 +71,8 @@ Updates ship through the same marketplace. Bump `version` in `.claude-plugin/plu
 ## Project layout
 
 ```
-.claude-plugin/       plugin.json (the plugin) and marketplace.json (lets people install it)
+.claude-plugin/       plugin.json (the plugin), marketplace.json (lets people install it) and icon.png
+assets/               editable source of the icon
 hooks/hooks.json      the three hooks; each runs scripts/run.sh <start|pause|stop>
 game/game.html        the game (shared by all platforms)
 scripts/run.sh        picks the scripts for the current OS
@@ -76,3 +87,7 @@ Each OS folder has `start_game`, `pause_game` and `stop_game`, plus `common.sh` 
 ## Known limitations
 
 * Several sessions running at once share one game window. The first session to finish closes it, even if another is still working.
+
+## License and affiliation
+
+MIT, see [LICENSE](LICENSE). Math Waiter is an independent project. It works with Claude Code but is not affiliated with or endorsed by Anthropic.

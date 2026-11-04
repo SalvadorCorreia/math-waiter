@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <rect width="1024" height="1024" rx="200" fill="#1e1e2e"/>
+  <g fill="none" stroke="#cdd6f4" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+    <!-- hourglass: top cap and upper bulb -->
+    <path d="M272 140H752"/>
+    <path d="M322 140C322 290 462 350 476 462"/>
+    <path d="M702 140C702 290 562 350 548 462"/>
+    <!-- neck flaring into the abacus frame -->
+    <path d="M476 462C468 510 400 548 322 580"/>
+    <path d="M548 462C556 510 624 548 702 580"/>
+    <!-- abacus frame -->
+    <rect x="232" y="580" width="560" height="310" rx="30"/>
+    <!-- rods -->
+    <g stroke-width="18">
+      <path d="M232 657H792"/>
+      <path d="M232 735H792"/>
+      <path d="M232 813H792"/>
+    </g>
+  </g>
+  <!-- sand: remaining heap and falling grains -->
+  <path d="M412 262Q512 296 612 262C578 318 528 352 512 408C496 352 446 318 412 262Z" fill="none" stroke="#f9e2af" stroke-width="22" stroke-linejoin="round"/>
+  <circle cx="512" cy="478" r="13" fill="#f9e2af"/>
+  <circle cx="512" cy="532" r="13" fill="#f9e2af"/>
+  <!-- beads: the grain lands as a bead -->
+  <g fill="#1e1e2e" stroke="#f9e2af" stroke-width="18">
+    <circle cx="300" cy="657" r="24"/><circle cx="512" cy="657" r="24"/><circle cx="724" cy="657" r="24"/>
+    <circle cx="300" cy="735" r="24"/><circle cx="368" cy="735" r="24"/><circle cx="724" cy="735" r="24"/>
+    <circle cx="300" cy="813" r="24"/><circle cx="656" cy="813" r="24"/><circle cx="724" cy="813" r="24"/>
+  </g>
+</svg>
