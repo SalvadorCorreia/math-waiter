@@ -71,8 +71,8 @@ Updates ship through the same marketplace. Bump `version` in `.claude-plugin/plu
 ## Project layout
 
 ```
-.claude-plugin/       plugin.json (the plugin), marketplace.json (lets people install it) and icon.png
-assets/               editable source of the icon
+.claude-plugin/       plugin.json (the plugin), marketplace.json (lets people install it) and the plugin icon
+assets/               editable source of the plugin icon
 hooks/hooks.json      the three hooks; each runs scripts/run.sh <start|pause|stop>
 game/game.html        the game (shared by all platforms)
 scripts/run.sh        picks the scripts for the current OS
