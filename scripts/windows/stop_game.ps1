@@ -3,7 +3,7 @@
 
 $GamePid = Get-GamePid
 if ($GamePid) {
-    # Close the window normally first so the browser flushes localStorage (game progress).
+    # Close the window normally first so the browser shuts down cleanly. The game itself is saved on the server after every answer.
     $Game = Get-Process -Id $GamePid
     if ($Game -and $Game.CloseMainWindow() -and $Game.WaitForExit(3000)) {
     } else {

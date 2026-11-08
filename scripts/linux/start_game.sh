@@ -1,5 +1,5 @@
 #!/bin/bash
-# Opens game.html in its own browser window, or brings it to front if already open.
+# Opens the game website in its own browser window, or brings it to front if already open.
 
 source "$(dirname "$0")/common.sh"
 
@@ -8,7 +8,6 @@ if [ -z "$BROWSER" ]; then
     # tab in the default browser. It cannot be closed or refocused automatically.
     if [ ! -f "$RUN_DIR/fallback" ]; then
         mkdir -p "$RUN_DIR" && touch "$RUN_DIR/fallback"
-        install_game
         setsid -f xdg-open "$GAME_URL" > /dev/null 2>&1
         notify-send "Math Waiter" \
             "Opened in your browser. Install Firefox, Chrome, Edge or Brave so the game opens and closes with Claude." \

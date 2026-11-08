@@ -1,26 +1,26 @@
 # Math Waiter
 
-A math game that keeps you busy while Claude Code works. Claude Code hooks open the game in a browser window when you submit a prompt, hand focus back to Claude when it needs your input, and close the game when Claude finishes. Your current run is saved, so it continues the next time the game opens.
+A math game that keeps you busy while Claude Code works. Claude Code hooks open [mathwaiter.tech](https://mathwaiter.tech) in a browser window when you submit a prompt, hand focus back to Claude when it needs your input, and close the game when Claude finishes. Your current run is saved, so it continues the next time the game opens. The game needs an internet connection.
 
 ## How it works
 
 | Event | Script | Effect |
 |---|---|---|
-| `UserPromptSubmit` | `start_game` | Opens `game/game.html` in a browser app window, or brings it to front if already open |
+| `UserPromptSubmit` | `start_game` | Opens `https://mathwaiter.tech/play` in a browser app window, or brings it to front if already open |
 | `Notification` (`permission_prompt`, `idle_prompt`) | `pause_game` | Brings Claude back to front. The game's timer pauses itself when its window loses focus. |
 | `Stop` | `stop_game` | Closes the game window and brings Claude back to front |
 
-The game runs in its own window with a separate browser profile, so closing it never touches your normal browser windows. The profile also keeps the leaderboard.
+The game runs in its own window with a separate browser profile, so closing it never touches your normal browser windows. The profile also keeps you signed in.
 
 ## What it does on your machine
 
 The hooks run as shell commands with your user permissions, so here is everything they do:
 
-* **Network and data:** neither the game nor the scripts contact any server, and they do not read your prompts or conversation. Scores stay in the game's browser profile. The browser itself may still make its own background requests, such as update checks.
+* **Network and data:** the scripts themselves send nothing and never read your prompts, conversation or files. The game is the website `https://mathwaiter.tech`, so the game window talks to that server: your answers, scores and, if you create one, your account. See the [privacy page](https://mathwaiter.tech/privacy). The browser may also make its own background requests, such as update checks.
 * **Programs started:** your browser, with a dedicated profile. On Windows, PowerShell runs the scripts with `-ExecutionPolicy Bypass`, because script execution is off by default. If no supported browser is found, the game opens as a normal tab, with a desktop notification.
 * **Window control:** the scripts read which window is focused and later return focus to it, using `hyprctl`, `swaymsg`, `xdotool` or `wmctrl` on Linux, `osascript` (System Events) on macOS and Win32 calls on Windows.
 * **Closing the game:** the scripts ask the game window to close, and force-kill it after 3 seconds if it is still open. They find it by its profile path, so other browser windows are not affected.
-* **Files written:** a copy of the game, the browser profile (including Firefox settings from `scripts/firefox/`) and a small record of the focused window, all in the per-user folders listed under [Per-platform notes](#per-platform-notes) or in temporary storage.
+* **Files written:** the browser profile (including Firefox settings from `scripts/firefox/`) and a small record of the focused window, all in the per-user folders listed under [Per-platform notes](#per-platform-notes) or in temporary storage.
 
 `start_game` remembers the window you submitted the prompt from, and `pause_game` / `stop_game` return focus to it.
 
@@ -32,7 +32,7 @@ The game uses your default browser when it can control it, otherwise the first i
 * **Firefox-based** (Firefox, LibreWolf, Zen, Waterfox, Floorp): a separate Firefox instance whose settings (`scripts/firefox/`) hide the tabs and toolbars.
 * **Anything else** (e.g. Safari only): the game opens once per login session as a normal tab, and you get a notification. It cannot close or refocus itself.
 
-Each browser gets its own game profile, so switching your default browser starts a fresh leaderboard.
+Each browser gets its own game profile, so after switching your default browser you sign in again.
 
 ## Installation
 
@@ -66,7 +66,7 @@ Updates ship through the same marketplace. Bump `version` in `.claude-plugin/plu
 
 * **Windows:** needs [Git for Windows](https://git-scm.com/download/win), which Claude Code uses to run hooks. Without it Claude Code runs hooks in PowerShell, and the game does not start. Profiles live in `%LOCALAPPDATA%\math-waiter`.
 * **macOS:** the first run may ask for permission to control "System Events". Click **Allow**. If you dismissed it, enable it in System Settings → Privacy & Security → Automation / Accessibility. Profiles live in `~/Library/Application Support/math-waiter`.
-* **Linux:** profiles live in `~/.local/state/math-waiter`, or inside the browser's snap folder for snap browsers. Linux has no standard way to switch or close windows, so focus switching works on Hyprland, Sway (needs `jq`) and X11 (needs `xdotool`, or `wmctrl` + `xprop`). On other desktops, such as GNOME or KDE on Wayland, the game still opens, pauses on blur and closes; you switch windows yourself. There, a Firefox game window is closed with `SIGTERM`, which can lose the last few seconds of progress. Flatpak browsers are not supported.
+* **Linux:** profiles live in `~/.local/state/math-waiter`, or inside the browser's snap folder for snap browsers. Linux has no standard way to switch or close windows, so focus switching works on Hyprland, Sway (needs `jq`) and X11 (needs `xdotool`, or `wmctrl` + `xprop`). On other desktops, such as GNOME or KDE on Wayland, the game still opens, pauses on blur and closes; you switch windows yourself. There, a Firefox game window is closed with `SIGTERM`. Flatpak browsers are not supported.
 
 ## Project layout
 
@@ -74,7 +74,6 @@ Updates ship through the same marketplace. Bump `version` in `.claude-plugin/plu
 .claude-plugin/       plugin.json (the plugin), marketplace.json (lets people install it) and the plugin icon
 assets/               editable source of the plugin icon
 hooks/hooks.json      the three hooks; each runs scripts/run.sh <start|pause|stop>
-game/game.html        the game (shared by all platforms)
 scripts/run.sh        picks the scripts for the current OS
 scripts/windows/      PowerShell scripts
 scripts/macos/        bash + osascript scripts
@@ -87,6 +86,7 @@ Each OS folder has `start_game`, `pause_game` and `stop_game`, plus `common.sh` 
 ## Known limitations
 
 * Several sessions running at once share one game window. The first session to finish closes it, even if another is still working.
+* Without an internet connection the window shows the browser's offline page instead of the game.
 
 ## License and affiliation
 

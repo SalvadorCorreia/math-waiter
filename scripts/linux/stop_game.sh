@@ -5,7 +5,7 @@ source "$(dirname "$0")/common.sh"
 
 PID=$(game_pid)
 if [ -n "$PID" ]; then
-    # Close normally first so the browser flushes localStorage (game progress).
+    # Close normally first so the browser shuts down cleanly. The game itself is saved on the server after every answer.
     # Force it only if it has not exited after 3 seconds.
     close_pid "$PID"
     for _ in $(seq 30); do

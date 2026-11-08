@@ -1,11 +1,12 @@
 {
   "name": "math-waiter",
   "displayName": "Math Waiter",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A math game that opens while Claude Code works, steps aside when Claude needs you, and closes when it finishes.",
   "author": {
     "name": "Salvador Correia"
   },
+  "homepage": "https://mathwaiter.tech",
   "license": "MIT",
   "repository": "https://github.com/SalvadorCorreia/math-waiter",
   "keywords": ["game", "math", "hooks"]

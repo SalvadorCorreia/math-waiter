@@ -1,4 +1,4 @@
-# Opens game.html in its own browser window, or brings it to front if already open.
+# Opens the game website in its own browser window, or brings it to front if already open.
 . (Join-Path $PSScriptRoot 'common.ps1')
 
 if (-not $Browser) {
@@ -8,7 +8,6 @@ if (-not $Browser) {
     $Boot = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
     if (-not (Test-Path $Marker) -or (Get-Item $Marker).LastWriteTime -lt $Boot) {
         Set-Content $Marker ''
-        Install-Game
         Start-Process $GameUrl
     }
     exit 0

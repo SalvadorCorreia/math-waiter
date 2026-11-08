@@ -10,7 +10,6 @@
 # and its timer still pauses on blur; only the automatic focus switching is skipped.
 
 SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-GAME_DIR="$(cd "$SCRIPTS_DIR/../game" && pwd)"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/math-waiter"
 if [ -n "$XDG_RUNTIME_DIR" ]; then
     RUN_DIR="$XDG_RUNTIME_DIR/math-waiter"
@@ -18,19 +17,6 @@ else
     RUN_DIR="/tmp/math-waiter-$(id -u)"
 fi
 FOCUS_FILE="$RUN_DIR/focus"
-
-# Percent-encode everything except unreserved characters and '/', byte by byte.
-url_encode() {
-    local LC_ALL=C s="$1" out="" c i
-    for ((i = 0; i < ${#s}; i++)); do
-        c="${s:i:1}"
-        case "$c" in
-            [A-Za-z0-9/._~-]) out+="$c" ;;
-            *) out+=$(printf '%%%02X' "'$c") ;;
-        esac
-    done
-    printf '%s' "$out"
-}
 
 # "chromium" (supports --app), "firefox", or nothing for browsers the game cannot control.
 browser_kind() {
@@ -85,7 +71,7 @@ fi
 [ -z "$BROWSER" ] && KIND=""
 
 # A dedicated profile makes the game its own browser process, so stop_game.sh can close it
-# without touching the user's normal browser windows. It also keeps the leaderboard, so it
+# without touching the user's normal browser windows. It also keeps the player signed in, so it
 # lives in persistent storage rather than /tmp. Each browser gets its own profile, since
 # browsers cannot share one. Snap browsers cannot write to hidden folders in $HOME, so they
 # get a folder inside their own snap directory instead.
@@ -95,25 +81,19 @@ case "$BROWSER" in
     *)       PROFILE_DIR="$STATE_DIR/profile-$(basename "$BROWSER")" ;;
 esac
 
-# The browser stores the leaderboard and saved run per file:// path, and the plugin's own
-# folder changes with every plugin update. So the game is copied to a fixed per-user folder
-# and always opened from there. Snap browsers cannot read hidden folders in $HOME, so they
-# get the copy inside their snap directory.
-case "$BROWSER" in
-    /snap/*) GAME_COPY_DIR="$HOME/snap/$(basename "$BROWSER")/common/math-waiter-game" ;;
-    *)       GAME_COPY_DIR="$STATE_DIR/game" ;;
-esac
-GAME_URL="file://$(url_encode "$GAME_COPY_DIR/game.html")"
+# The game is the website. MATH_WAITER_URL points it at another address, such as a local
+# development server.
+GAME_URL="${MATH_WAITER_URL:-https://mathwaiter.tech/play}"
 
-# Refresh the fixed copy, so plugin updates still reach the game.
-install_game() {
-    mkdir -p "$GAME_COPY_DIR"
-    cp "$GAME_DIR/game.html" "$GAME_COPY_DIR/game.html"
+# Versions before 0.2.0 opened a local copy of the game; remove it.
+remove_old_game_copy() {
+    rm -rf -- "$STATE_DIR/game"
+    case "$BROWSER" in /snap/*) rm -rf -- "$HOME/snap/$(basename "$BROWSER")/common/math-waiter-game" ;; esac
 }
 
 # Start the game window detached, so the hook returns at once and the game outlives it.
 launch_game() {
-    install_game
+    remove_old_game_copy
     mkdir -p "$PROFILE_DIR"
     case "$KIND" in
         chromium)

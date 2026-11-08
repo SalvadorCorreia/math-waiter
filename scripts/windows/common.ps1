@@ -6,14 +6,10 @@
 $ErrorActionPreference = 'SilentlyContinue'
 
 $ScriptsDir = Split-Path $PSScriptRoot
-$GameSource = (Resolve-Path (Join-Path $ScriptsDir '..\game\game.html')).Path
 $StateDir   = Join-Path $env:LOCALAPPDATA 'math-waiter'
-# The browser stores the leaderboard and saved run per file:// path, and the plugin's own
-# folder changes with every plugin update. So the game is copied to a fixed per-user folder
-# and always opened from there.
-$GameCopy   = Join-Path $StateDir 'game\game.html'
-# AbsoluteUri percent-encodes spaces; Start-Process would otherwise split the URL at them.
-$GameUrl    = ([System.Uri]$GameCopy).AbsoluteUri
+# The game is the website. MATH_WAITER_URL points it at another address, such as a local
+# development server.
+$GameUrl    = if ($env:MATH_WAITER_URL) { $env:MATH_WAITER_URL } else { 'https://mathwaiter.tech/play' }
 $FocusFile  = Join-Path $env:TEMP 'math_waiter.focus'
 
 # "chromium" (supports --app), "firefox", or nothing for browsers the game cannot control.
@@ -50,18 +46,17 @@ $Browser = $Candidates | Where-Object { $_ -and (Test-Path $_) -and (Get-Browser
 $Kind    = if ($Browser) { Get-BrowserKind $Browser }
 
 # A dedicated profile makes the game its own browser process, so stop_game can close it
-# without touching the user's normal browser windows. It also keeps the leaderboard.
+# without touching the user's normal browser windows. It also keeps the player signed in.
 # Each browser gets its own profile, since browsers cannot share one.
 $ProfileDir = if ($Browser) { Join-Path $StateDir ('profile-' + [IO.Path]::GetFileNameWithoutExtension($Browser)) }
 
-# Refresh the fixed copy, so plugin updates still reach the game.
-function Install-Game {
-    New-Item -ItemType Directory -Force (Split-Path $GameCopy) | Out-Null
-    Copy-Item $GameSource $GameCopy -Force
+# Versions before 0.2.0 opened a local copy of the game; remove it.
+function Remove-OldGameCopy {
+    Remove-Item -Recurse -Force (Join-Path $StateDir 'game')
 }
 
 function Start-Game {
-    Install-Game
+    Remove-OldGameCopy
     New-Item -ItemType Directory -Force $ProfileDir | Out-Null
     if ($Kind -eq 'chromium') {
         $Arguments = @(
