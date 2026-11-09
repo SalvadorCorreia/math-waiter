@@ -9,7 +9,7 @@ The agent integration for Math Waiter, a math game at https://mathwaiter.tech th
 | `.claude-plugin/plugin.json` | Plugin manifest (`name: math-waiter`, `version`) | this file |
 | `.claude-plugin/marketplace.json` | Lets users install from this repo (`/plugin marketplace add SalvadorCorreia/math-waiter`) | this file |
 | `hooks/hooks.json` | `UserPromptSubmit` → start, `Notification` (`permission_prompt\|idle_prompt`) → pause, `Stop` → stop; each runs `scripts/run.sh <action>` | this file |
-| `commands/login.md` | `/math-waiter:login`: runs `scripts/run.sh account`, which opens the game window on the site's account screen | this file |
+| `commands/` | `/math-waiter:login` runs `scripts/run.sh account` (game window on the site's account screen). `:on`, `:off`, `:default on\|off` and `:status` only print `run.sh status`: the UserPromptSubmit hook applies each switch before the command runs | [scripts/AGENTS.md](scripts/AGENTS.md) |
 | `scripts/` | OS dispatcher, per-OS start/pause/stop scripts, shared Firefox profile settings | [scripts/AGENTS.md](scripts/AGENTS.md) |
 | `README.md` | User-facing install and platform notes | keep in sync with behavior changes |
 

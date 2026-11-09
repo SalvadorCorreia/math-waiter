@@ -13,6 +13,20 @@ A math game that keeps you busy while Claude Code works. Claude Code hooks open 
 
 The game runs in its own window with a separate browser profile, so closing it never touches your normal browser windows. The profile also keeps you signed in.
 
+## Turning it on and off
+
+Type these in Claude Code:
+
+| Command | What it does |
+|---|---|
+| `/math-waiter:off` | Turns the game off in this conversation, and closes it if it is open |
+| `/math-waiter:on` | Turns it back on in this conversation |
+| `/math-waiter:default off` | New conversations start with the game off, until you run `/math-waiter:on` in one |
+| `/math-waiter:default on` | New conversations start with the game on (how it comes installed) |
+| `/math-waiter:status` | Shows whether it is on here and in new conversations |
+
+A conversation you switched keeps its choice; the others follow the default. The settings are kept in `~/.config/math-waiter`. To remove the plugin entirely, see [Installation](#installation).
+
 ## Your account
 
 You can play without an account. An account keeps your scores across devices and puts your name on room leaderboards. You can sign in with Google, or with an email and password.
@@ -30,7 +44,7 @@ The hooks run as shell commands with your user permissions, so here is everythin
 * **Programs started:** your browser, with a dedicated profile. On Windows, PowerShell runs the scripts with `-ExecutionPolicy Bypass`, because script execution is off by default. If no supported browser is found, the game opens as a normal tab, with a desktop notification.
 * **Window control:** the scripts read which window is focused and later return focus to it, using `hyprctl`, `swaymsg`, `xdotool` or `wmctrl` on Linux, `osascript` (System Events) on macOS and Win32 calls on Windows.
 * **Closing the game:** the scripts ask the game window to close, and force-kill it after 3 seconds if it is still open. They find it by its profile path, so other browser windows are not affected.
-* **Files written:** the browser profile (including Firefox settings from `scripts/firefox/`) and a small record of the focused window, all in the per-user folders listed under [Per-platform notes](#per-platform-notes) or in temporary storage.
+* **Files written:** your on/off settings in `~/.config/math-waiter`, the browser profile (including Firefox settings from `scripts/firefox/`) and a small record of the focused window, all in the per-user folders listed under [Per-platform notes](#per-platform-notes) or in temporary storage.
 
 `start_game` remembers the window you submitted the prompt from, and `pause_game` / `stop_game` return focus to it.
 
@@ -84,7 +98,7 @@ Updates ship through the same marketplace. Bump `version` in `.claude-plugin/plu
 .claude-plugin/       plugin.json (the plugin), marketplace.json (lets people install it) and the plugin icon
 assets/               editable source of the plugin icon
 hooks/hooks.json      the three hooks; each runs scripts/run.sh <start|pause|stop>
-commands/login.md     the /math-waiter:login command; runs scripts/run.sh account
+commands/             /math-waiter:login, :on, :off, :default and :status
 scripts/run.sh        picks the scripts for the current OS
 scripts/windows/      PowerShell scripts
 scripts/macos/        bash + osascript scripts

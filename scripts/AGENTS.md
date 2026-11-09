@@ -4,7 +4,10 @@ Parent: [../AGENTS.md](../AGENTS.md). Per-OS guides: [linux/AGENTS.md](linux/AGE
 
 ## Files
 
-- `run.sh <start|pause|stop|account>`: entry point for every hook and for the login command. POSIX `sh`, picks the OS folder via `uname -s` (`Darwin`, `Linux`, `MINGW*/MSYS*/CYGWIN*` → PowerShell). Unknown actions and unknown OSes exit 0.
+- `run.sh <start|pause|stop|account|status>`: entry point for every hook and command. It also owns the on/off settings, so every OS shares one implementation:
+  - Settings: `${XDG_CONFIG_HOME:-~/.config}/math-waiter/default` (`on`/`off`, missing means on) and `sessions/<session_id>` for conversations switched with `/math-waiter:on|off`; files older than 30 days are removed.
+  - A command cannot see its conversation's ID, but the UserPromptSubmit hook gets `session_id` and the `prompt` on stdin. So `start` reads a prompt that *starts with* `/math-waiter:on|off|status|default on|off`, applies it, writes `status`, and exits without opening the game. The command then prints `run.sh status`.
+  - Hooks of a conversation that is off do nothing. Without JSON on stdin (running a script by hand) the game is on. POSIX `sh`, picks the OS folder via `uname -s` (`Darwin`, `Linux`, `MINGW*/MSYS*/CYGWIN*` → PowerShell). Unknown actions and unknown OSes exit 0.
 - `<os>/start_game`, `pause_game`, `stop_game`, plus `common.sh` / `common.ps1` with the shared helpers. All three OS folders implement the same contract below; keep them in step when changing one.
 - `firefox/user.js`, `firefox/userChrome.css`: copied into the game's Firefox profile on every launch by all three OSes; they hide tabs/toolbars and first-run pages, since Firefox has no app mode.
 
