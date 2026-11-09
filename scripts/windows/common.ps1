@@ -7,9 +7,13 @@ $ErrorActionPreference = 'SilentlyContinue'
 
 $ScriptsDir = Split-Path $PSScriptRoot
 $StateDir   = Join-Path $env:LOCALAPPDATA 'math-waiter'
-# The game is the website. MATH_WAITER_URL points it at another address, such as a local
+# The game is the website. MATH_WAITER_SITE points it at another address, such as a local
 # development server.
-$GameUrl    = if ($env:MATH_WAITER_URL) { $env:MATH_WAITER_URL } else { 'https://mathwaiter.tech/play' }
+$Site       = if ($env:MATH_WAITER_SITE) { $env:MATH_WAITER_SITE } else { 'https://mathwaiter.tech' }
+$GameUrl    = "$Site/play"
+$AccountUrl = "$Site/account"
+# Set by the login command: the window it opened must survive the Stop hook of that same turn.
+$KeepOpenFile = Join-Path $env:TEMP 'math_waiter.keep_open'
 $FocusFile  = Join-Path $env:TEMP 'math_waiter.focus'
 
 # "chromium" (supports --app), "firefox", or nothing for browsers the game cannot control.
@@ -55,12 +59,13 @@ function Remove-OldGameCopy {
     Remove-Item -Recurse -Force (Join-Path $StateDir 'game')
 }
 
-function Start-Game {
+# Opens the game window on the page given, or the game itself.
+function Start-Game($Url = $GameUrl) {
     Remove-OldGameCopy
     New-Item -ItemType Directory -Force $ProfileDir | Out-Null
     if ($Kind -eq 'chromium') {
         $Arguments = @(
-            "--app=$GameUrl",
+            "--app=$Url",
             "--user-data-dir=`"$ProfileDir`"",
             '--no-first-run',
             '--no-default-browser-check',
@@ -71,7 +76,7 @@ function Start-Game {
         New-Item -ItemType Directory -Force $ChromeDir | Out-Null
         Copy-Item (Join-Path $ScriptsDir 'firefox\user.js') $ProfileDir
         Copy-Item (Join-Path $ScriptsDir 'firefox\userChrome.css') $ChromeDir
-        $Arguments = @('-no-remote', '-profile', "`"$ProfileDir`"", $GameUrl)
+        $Arguments = @('-no-remote', '-profile', "`"$ProfileDir`"", $Url)
     }
     Start-Process -FilePath $Browser -ArgumentList $Arguments
 }
@@ -110,4 +115,15 @@ function Set-FocusPid($ProcessId) {
 # Return focus to the app saved by Save-Focus.
 function Restore-Focus {
     if (Test-Path $FocusFile) { Set-FocusPid (Get-Content $FocusFile) }
+}
+
+# Close the game window normally, so the browser shuts down cleanly, and force it only if it has
+# not exited after 3 seconds. The game itself is saved on the server after every answer.
+function Close-Game {
+    $GamePid = Get-GamePid
+    if (-not $GamePid) { return }
+    $Game = Get-Process -Id $GamePid
+    if (-not ($Game -and $Game.CloseMainWindow() -and $Game.WaitForExit(3000))) {
+        taskkill /PID $GamePid /T /F | Out-Null
+    }
 }

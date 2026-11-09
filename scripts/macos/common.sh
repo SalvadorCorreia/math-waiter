@@ -11,9 +11,13 @@ STATE_DIR="$HOME/Library/Application Support/math-waiter"
 RUN_DIR="${TMPDIR:-/tmp/}math-waiter"
 FOCUS_FILE="$RUN_DIR/focus"
 
-# The game is the website. MATH_WAITER_URL points it at another address, such as a local
+# The game is the website. MATH_WAITER_SITE points it at another address, such as a local
 # development server.
-GAME_URL="${MATH_WAITER_URL:-https://mathwaiter.tech/play}"
+SITE="${MATH_WAITER_SITE:-https://mathwaiter.tech}"
+GAME_URL="$SITE/play"
+ACCOUNT_URL="$SITE/account"
+# Set by the login command: the window it opened must survive the Stop hook of that same turn.
+KEEP_OPEN_FILE="$RUN_DIR/keep-open"
 
 # Versions before 0.2.0 opened a local copy of the game; remove it.
 remove_old_game_copy() {
@@ -67,19 +71,19 @@ fi
 PROFILE_DIR=""
 [ -n "$BROWSER" ] && PROFILE_DIR="$STATE_DIR/profile-$BUNDLE_ID"
 
-# Start the game window in the background, so the hook returns at once.
+# Start the game window, on the page given or the game itself, in the background, so the hook returns at once.
 launch_game() {
     remove_old_game_copy
     mkdir -p "$PROFILE_DIR"
     case "$KIND" in
         chromium)
-            "$BROWSER" --app="$GAME_URL" --user-data-dir="$PROFILE_DIR" \
+            "$BROWSER" --app="${1:-$GAME_URL}" --user-data-dir="$PROFILE_DIR" \
                 --no-first-run --no-default-browser-check --window-size=700,800 > /dev/null 2>&1 & ;;
         firefox)
             mkdir -p "$PROFILE_DIR/chrome"
             cp "$SCRIPTS_DIR/firefox/user.js" "$PROFILE_DIR/user.js"
             cp "$SCRIPTS_DIR/firefox/userChrome.css" "$PROFILE_DIR/chrome/userChrome.css"
-            "$BROWSER" -no-remote -profile "$PROFILE_DIR" "$GAME_URL" > /dev/null 2>&1 & ;;
+            "$BROWSER" -no-remote -profile "$PROFILE_DIR" "${1:-$GAME_URL}" > /dev/null 2>&1 & ;;
     esac
 }
 
@@ -129,4 +133,18 @@ close_pid() {
         var app = \$.NSRunningApplication.runningApplicationWithProcessIdentifier($1);
         app.isNil() ? false : app.terminate" 2> /dev/null)
     [ "$sent" = "true" ] || kill "$1" 2> /dev/null
+}
+
+# Close the game window normally, so the browser shuts down cleanly, and force it only if it
+# has not exited after 3 seconds. The game itself is saved on the server after every answer.
+close_game() {
+    local pid
+    pid=$(game_pid)
+    [ -n "$pid" ] || return 0
+    close_pid "$pid"
+    for _ in $(seq 30); do
+        kill -0 "$pid" 2> /dev/null || return 0
+        sleep 0.1
+    done
+    kill -KILL "$pid" 2> /dev/null
 }

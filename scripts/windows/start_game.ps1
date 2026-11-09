@@ -1,6 +1,9 @@
 # Opens the game website in its own browser window, or brings it to front if already open.
 . (Join-Path $PSScriptRoot 'common.ps1')
 
+# A new prompt: from here on the Stop hook closes the window again.
+Remove-Item $KeepOpenFile -Force
+
 if (-not $Browser) {
     # No browser the scripts can control: open the game once per boot as a normal tab in the
     # default browser. It cannot be closed or refocused automatically.

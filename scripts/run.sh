@@ -1,12 +1,12 @@
 #!/bin/sh
 # Entry point for the plugin's hooks: runs <action>_game for this OS.
-# Usage: run.sh start|pause|stop
+# Usage: run.sh start|pause|stop|account
 #
 # Hook commands run through sh on macOS and Linux and through Git Bash on Windows,
 # so one POSIX sh script can pick the right folder everywhere.
 
 case "$1" in
-    start | pause | stop) ;;
+    start | pause | stop | account) ;;
     *) exit 0 ;;
 esac
 

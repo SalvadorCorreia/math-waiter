@@ -9,8 +9,18 @@ A math game that keeps you busy while Claude Code works. Claude Code hooks open 
 | `UserPromptSubmit` | `start_game` | Opens `https://mathwaiter.tech/play` in a browser app window, or brings it to front if already open |
 | `Notification` (`permission_prompt`, `idle_prompt`) | `pause_game` | Brings Claude back to front. The game's timer pauses itself when its window loses focus. |
 | `Stop` | `stop_game` | Closes the game window and brings Claude back to front |
+| `/math-waiter:login` command | `account_game` | Opens the game window on its sign-in screen and keeps it open past that turn |
 
 The game runs in its own window with a separate browser profile, so closing it never touches your normal browser windows. The profile also keeps you signed in.
+
+## Your account
+
+You can play without an account. An account keeps your scores across devices and puts your name on room leaderboards. You can sign in with Google, or with an email and password.
+
+* **In the game window**, which is what the plugin opens: run `/math-waiter:login` in Claude Code. The game window opens on its sign-in screen, where you can sign in, create an account or change your profile, and it stays open until your next prompt finishes. The game window uses its own browser profile, so sign in there once even if you are already signed in in your normal browser.
+* **In your normal browser**: go to [mathwaiter.tech/account](https://mathwaiter.tech/account). This also works to play without Claude Code, at [mathwaiter.tech/play](https://mathwaiter.tech/play).
+
+Creating an account with email sends one email to confirm the address. After that, signing in sends no email.
 
 ## What it does on your machine
 
@@ -74,6 +84,7 @@ Updates ship through the same marketplace. Bump `version` in `.claude-plugin/plu
 .claude-plugin/       plugin.json (the plugin), marketplace.json (lets people install it) and the plugin icon
 assets/               editable source of the plugin icon
 hooks/hooks.json      the three hooks; each runs scripts/run.sh <start|pause|stop>
+commands/login.md     the /math-waiter:login command; runs scripts/run.sh account
 scripts/run.sh        picks the scripts for the current OS
 scripts/windows/      PowerShell scripts
 scripts/macos/        bash + osascript scripts
@@ -81,7 +92,7 @@ scripts/linux/        bash scripts
 scripts/firefox/      settings for the game's Firefox profile (shared by all platforms)
 ```
 
-Each OS folder has `start_game`, `pause_game` and `stop_game`, plus `common.sh` / `common.ps1` with the shared helpers (browser detection, profile, focus). To test them by hand, run `scripts/run.sh start` (a "Math Waiter" window opens), run it again (no second window opens), then `scripts/run.sh stop` (the window closes and your other browser windows stay open).
+Each OS folder has `start_game`, `pause_game`, `stop_game` and `account_game`, plus `common.sh` / `common.ps1` with the shared helpers (browser detection, profile, focus). To test them by hand, run `scripts/run.sh start` (a "Math Waiter" window opens), run it again (no second window opens), then `scripts/run.sh stop` (the window closes and your other browser windows stay open).
 
 ## Known limitations
 

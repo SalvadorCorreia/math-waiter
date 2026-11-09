@@ -3,6 +3,9 @@
 
 source "$(dirname "$0")/common.sh"
 
+# A new prompt: from here on the Stop hook closes the window again.
+rm -f "$KEEP_OPEN_FILE"
+
 if [ -z "$BROWSER" ]; then
     # No browser the scripts can control: open the game once per login session as a normal
     # tab in the default browser. It cannot be closed or refocused automatically.
