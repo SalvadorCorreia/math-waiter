@@ -10,6 +10,7 @@ Bash **3.2** (what macOS ships): no associative arrays, `mapfile`, `${var,,}` or
 - **Profiles:** `~/Library/Application Support/math-waiter/profile-<bundle id>` (the path contains a space; keep it quoted).
 - **Runtime state:** `${TMPDIR}math-waiter`.
 - **Focus:** at start, the frontmost process's unix id plus its `AXFocusedWindow` position, size and title, tab-separated in `focus-<session>`. Restore makes the process frontmost and `AXRaise`s the window with the same position and size, else the same title, else leaves the app's front window. AppleScript has no lasting window ID, hence the matching. A one-field file (before 0.3.0) restores the app only. First run asks the user to allow controlling "System Events".
+- **Bringing the game to front:** a browser started by the hook (a background process) is not made frontmost, so `start` and `account` call `show_game`: wait up to 5 s for `game_pid`, then up to 5 s for the process to have a window, and set it frontmost.
 - **Close:** `NSRunningApplication.terminate` on the game's PID (same as Cmd+Q for that one process). Never quit by app name: that would close the user's own browser.
 
 ## Testing

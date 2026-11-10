@@ -12,4 +12,5 @@ fi
 mkdir -p "$RUN_DIR" && touch "$KEEP_OPEN_FILE"
 close_game
 launch_game "$ACCOUNT_URL"
+show_game
 exit 0

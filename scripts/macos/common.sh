@@ -140,6 +140,36 @@ focus_pid() {
         > /dev/null 2>&1
 }
 
+# Bring the game to front once it has a window. A browser started by a background process (the
+# hook) is not made frontmost by macOS, so a new game window would otherwise open behind the app in
+# use. Waits up to 5 seconds for the process and 5 more for its window.
+show_game() {
+    local pid="" i
+    for i in $(seq 50); do
+        pid=$(game_pid)
+        [ -n "$pid" ] && break
+        sleep 0.1
+    done
+    [ -n "$pid" ] || return
+    osascript - "$pid" > /dev/null 2>&1 <<'APPLESCRIPT'
+on run argv
+    set pidNum to (item 1 of argv) as integer
+    tell application "System Events"
+        repeat 25 times
+            try
+                set p to first process whose unix id is pidNum
+                if (count of windows of p) > 0 then
+                    set frontmost of p to true
+                    return
+                end if
+            end try
+            delay 0.2
+        end repeat
+    end tell
+end run
+APPLESCRIPT
+}
+
 # Bring the app to front and raise the window with the saved position and size, or else the saved
 # title. If neither is there any more, the app's own front window stays in front.
 focus_window() {

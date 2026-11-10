@@ -21,11 +21,6 @@ fi
 # The prompt was just submitted, so the frontmost app is the one Claude Code runs in.
 save_focus
 
-PID=$(game_pid)
-if [ -n "$PID" ]; then
-    focus_pid "$PID"
-    exit 0
-fi
-
-launch_game
+[ -n "$(game_pid)" ] || launch_game
+show_game
 exit 0
