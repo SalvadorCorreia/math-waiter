@@ -10,4 +10,5 @@ if (-not $Browser) {
 Set-Content $KeepOpenFile ''
 Close-Game
 Start-Game $AccountUrl
+Show-Game
 exit 0

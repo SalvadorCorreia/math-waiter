@@ -1,7 +1,7 @@
 {
   "name": "math-waiter",
   "displayName": "Math Waiter",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A math game that opens while Claude Code works, steps aside when Claude needs you, and closes when it finishes.",
   "author": {
     "name": "Salvador Correia"

@@ -19,11 +19,8 @@ if (-not $Browser) {
 # The prompt was just submitted, so the foreground app is the one Claude Code runs in.
 Save-Focus
 
-$GamePid = Get-GamePid
-if ($GamePid) {
-    Set-FocusPid $GamePid
-    exit 0
-}
-
-Start-Game
+# A window started from a background process opens behind the app in use, so it is brought to
+# front once it exists.
+if (-not (Get-GamePid)) { Start-Game }
+Show-Game
 exit 0

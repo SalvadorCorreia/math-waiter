@@ -9,7 +9,7 @@ A math game that keeps you busy while Claude Code works. Claude Code hooks open 
 | `UserPromptSubmit` | `start_game` | Opens `https://mathwaiter.tech/play` in a browser app window, or brings it to front if already open |
 | `Notification` (`permission_prompt`) | `pause_game` | Brings Claude back to front. The game's timer pauses itself when its window loses focus. |
 | `Stop`, `StopFailure` | `stop_game` | Closes the game window and brings Claude back to front |
-| `Notification` (`idle_prompt`), `SessionEnd` | `stop_game` | Only for a turn that ended without `Stop` (you interrupted Claude, or closed the conversation mid-turn): same as `Stop` |
+| `Notification` (`idle_prompt`), `SessionEnd` | `stop_game` | Only for a turn that ended without `Stop` (you interrupted Claude, or closed the conversation mid-turn): same as `Stop`. Claude Code runs no hook on an interrupt itself, and the scripts never read your conversation to spot one, so where these do not fire (seen in the desktop app on Windows) the game stays open until your next prompt finishes |
 | `/math-waiter:login`, `/math-waiter:profile` commands | `account_game` | Opens the game window on the sign-in or profile page and keeps it open past that turn |
 
 The game runs in its own window with a separate browser profile, so closing it never touches your normal browser windows. The profile also keeps you signed in.

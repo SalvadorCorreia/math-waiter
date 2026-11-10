@@ -105,6 +105,7 @@ Add-Type -Namespace MathWaiter -Name Win32 -MemberDefinition @'
 [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
 [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+[DllImport("user32.dll")] public static extern void SwitchToThisWindow(IntPtr hWnd, bool fAltTab);
 [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();
 '@
 
@@ -122,8 +123,10 @@ function Set-FocusPid($ProcessId) {
     (New-Object -ComObject WScript.Shell).AppActivate([int]$ProcessId) | Out-Null
 }
 
-# Windows only lets the foreground app hand the foreground on, so this borrows its input queue
-# for the moment of the switch. Returns whether the window ended up in front.
+# Windows only lets the foreground app hand the foreground on, and a hook runs in the background,
+# so this borrows the foreground app's input queue for the moment of the switch. When Windows still
+# refuses, SwitchToThisWindow (what Alt+Tab uses) usually gets through. Returns whether the window
+# ended up in front.
 function Set-FocusWindow([IntPtr]$Window) {
     if ([MathWaiter.Win32]::IsIconic($Window)) { [void][MathWaiter.Win32]::ShowWindow($Window, 9) } # SW_RESTORE
     [uint32]$Ignored = 0
@@ -132,7 +135,21 @@ function Set-FocusWindow([IntPtr]$Window) {
     $Attached = $ForegroundThread -and $ForegroundThread -ne $OwnThread -and [MathWaiter.Win32]::AttachThreadInput($OwnThread, $ForegroundThread, $true)
     [void][MathWaiter.Win32]::SetForegroundWindow($Window)
     if ($Attached) { [void][MathWaiter.Win32]::AttachThreadInput($OwnThread, $ForegroundThread, $false) }
+    if ([MathWaiter.Win32]::GetForegroundWindow() -ne $Window) { [MathWaiter.Win32]::SwitchToThisWindow($Window, $true) }
     [MathWaiter.Win32]::GetForegroundWindow() -eq $Window
+}
+
+# Bring the game window to front, waiting up to 5 seconds for a window that is still opening.
+function Show-Game {
+    for ($i = 0; $i -lt 50; $i++) {
+        $GamePid = Get-GamePid
+        $Window = if ($GamePid) { (Get-Process -Id $GamePid).MainWindowHandle } else { [IntPtr]::Zero }
+        if ($Window -and $Window -ne [IntPtr]::Zero) {
+            if (-not (Set-FocusWindow $Window)) { Set-FocusPid $GamePid }
+            return
+        }
+        Start-Sleep -Milliseconds 100
+    }
 }
 
 # Return focus to the window saved by Save-Focus, or to its app when that window has closed (or its
