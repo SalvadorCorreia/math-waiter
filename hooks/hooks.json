@@ -21,6 +21,20 @@
           { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}\"/scripts/run.sh stop", "timeout": 15 }
         ]
       }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}\"/scripts/run.sh stop", "timeout": 15 }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}\"/scripts/run.sh end", "timeout": 15 }
+        ]
+      }
     ]
   }
 }

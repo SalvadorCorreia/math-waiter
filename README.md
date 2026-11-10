@@ -7,11 +7,14 @@ A math game that keeps you busy while Claude Code works. Claude Code hooks open 
 | Event | Script | Effect |
 |---|---|---|
 | `UserPromptSubmit` | `start_game` | Opens `https://mathwaiter.tech/play` in a browser app window, or brings it to front if already open |
-| `Notification` (`permission_prompt`, `idle_prompt`) | `pause_game` | Brings Claude back to front. The game's timer pauses itself when its window loses focus. |
-| `Stop` | `stop_game` | Closes the game window and brings Claude back to front |
-| `/math-waiter:login` command | `account_game` | Opens the game window on its sign-in screen and keeps it open past that turn |
+| `Notification` (`permission_prompt`) | `pause_game` | Brings Claude back to front. The game's timer pauses itself when its window loses focus. |
+| `Stop`, `StopFailure` | `stop_game` | Closes the game window and brings Claude back to front |
+| `Notification` (`idle_prompt`), `SessionEnd` | `stop_game` | Only for a turn that ended without `Stop` (you interrupted Claude, or closed the conversation mid-turn): same as `Stop` |
+| `/math-waiter:login`, `/math-waiter:profile` commands | `account_game` | Opens the game window on the sign-in or profile page and keeps it open past that turn |
 
 The game runs in its own window with a separate browser profile, so closing it never touches your normal browser windows. The profile also keeps you signed in.
+
+**Several conversations at once** share one game window. It closes only when the last working conversation finishes; when another one finishes first, focus goes back to that conversation's window and the game stays open. Each conversation leaves an empty file in temporary storage while it works; one older than 3 hours (a conversation that crashed) no longer counts.
 
 ## Turning it on and off
 
@@ -31,7 +34,7 @@ A conversation you switched keeps its choice; the others follow the default. The
 
 You can play without an account. An account keeps your scores across devices and puts your name on room leaderboards. You can sign in with Google, or with an email and password.
 
-* **In the game window**, which is what the plugin opens: run `/math-waiter:login` in Claude Code. The game window opens on its sign-in screen, where you can sign in, create an account or change your profile, and it stays open until your next prompt finishes. The game window uses its own browser profile, so sign in there once even if you are already signed in in your normal browser.
+* **In the game window**, which is what the plugin opens: run `/math-waiter:login` in Claude Code. The game window opens on its sign-in screen, where you can sign in or create an account, and it stays open until your next prompt finishes. `/math-waiter:profile` opens it on your profile instead, to change your name, avatar, sound or difficulty. The game window uses its own browser profile, so sign in there once even if you are already signed in in your normal browser.
 * **In your normal browser**: go to [mathwaiter.tech/account](https://mathwaiter.tech/account). This also works to play without Claude Code, at [mathwaiter.tech/play](https://mathwaiter.tech/play).
 
 Creating an account with email sends one email to confirm the address. After that, signing in sends no email.
@@ -44,9 +47,9 @@ The hooks run as shell commands with your user permissions, so here is everythin
 * **Programs started:** your browser, with a dedicated profile. On Windows, PowerShell runs the scripts with `-ExecutionPolicy Bypass`, because script execution is off by default. If no supported browser is found, the game opens as a normal tab, with a desktop notification.
 * **Window control:** the scripts read which window is focused and later return focus to it, using `hyprctl`, `swaymsg`, `xdotool` or `wmctrl` on Linux, `osascript` (System Events) on macOS and Win32 calls on Windows.
 * **Closing the game:** the scripts ask the game window to close, and force-kill it after 3 seconds if it is still open. They find it by its profile path, so other browser windows are not affected.
-* **Files written:** your on/off settings in `~/.config/math-waiter`, the browser profile (including Firefox settings from `scripts/firefox/`) and a small record of the focused window, all in the per-user folders listed under [Per-platform notes](#per-platform-notes) or in temporary storage.
+* **Files written:** your on/off settings in `~/.config/math-waiter`, the browser profile (including Firefox settings from `scripts/firefox/`) a small record of each conversation's focused window and whether it is working, all in the per-user folders listed under [Per-platform notes](#per-platform-notes) or in temporary storage.
 
-`start_game` remembers the window you submitted the prompt from, and `pause_game` / `stop_game` return focus to it.
+`start_game` remembers the window you submitted the prompt from, per conversation, and `pause_game` / `stop_game` return focus to it.
 
 ## Browser
 

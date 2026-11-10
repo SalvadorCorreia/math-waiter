@@ -11,10 +11,12 @@ $StateDir   = Join-Path $env:LOCALAPPDATA 'math-waiter'
 # development server.
 $Site       = if ($env:MATH_WAITER_SITE) { $env:MATH_WAITER_SITE } else { 'https://mathwaiter.tech' }
 $GameUrl    = "$Site/play"
-$AccountUrl = "$Site/account"
+# The login and profile commands open their own page; run.sh sets which.
+$AccountUrl = if ($env:MATH_WAITER_PAGE -eq 'profile') { "$Site/profile" } else { "$Site/account" }
 # Set by the login command: the window it opened must survive the Stop hook of that same turn.
 $KeepOpenFile = Join-Path $env:TEMP 'math_waiter.keep_open'
-$FocusFile  = Join-Path $env:TEMP 'math_waiter.focus'
+# One per conversation (run.sh exports its ID), so each returns focus to its own terminal.
+$FocusFile  = Join-Path $env:TEMP ('math_waiter.focus' + $(if ($env:MATH_WAITER_SESSION -match '^[A-Za-z0-9_-]+$') { "-$env:MATH_WAITER_SESSION" } else { '' }))
 
 # "chromium" (supports --app), "firefox", or nothing for browsers the game cannot control.
 function Get-BrowserKind($Exe) {

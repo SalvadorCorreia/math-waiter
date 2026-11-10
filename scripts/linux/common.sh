@@ -16,7 +16,8 @@ if [ -n "$XDG_RUNTIME_DIR" ]; then
 else
     RUN_DIR="/tmp/math-waiter-$(id -u)"
 fi
-FOCUS_FILE="$RUN_DIR/focus"
+# One per conversation (run.sh exports its ID), so each returns focus to its own terminal.
+FOCUS_FILE="$RUN_DIR/focus${MATH_WAITER_SESSION:+-$MATH_WAITER_SESSION}"
 
 # "chromium" (supports --app), "firefox", or nothing for browsers the game cannot control.
 browser_kind() {
@@ -85,7 +86,8 @@ esac
 # development server.
 SITE="${MATH_WAITER_SITE:-https://mathwaiter.tech}"
 GAME_URL="$SITE/play"
-ACCOUNT_URL="$SITE/account"
+# The login and profile commands open their own page; run.sh sets which.
+case "$MATH_WAITER_PAGE" in profile) ACCOUNT_URL="$SITE/profile" ;; *) ACCOUNT_URL="$SITE/account" ;; esac
 # Set by the login command: the window it opened must survive the Stop hook of that same turn.
 KEEP_OPEN_FILE="$RUN_DIR/keep-open"
 
