@@ -10,7 +10,7 @@ PowerShell (Windows PowerShell 5.1 compatible). `common.ps1` is dot-sourced by t
 - **Default browser:** `HKCU\...\UrlAssociations\https\UserChoice` ProgId, then `HKEY_CLASSES_ROOT\<ProgId>\shell\open\command`.
 - **Profiles:** `%LOCALAPPDATA%\math-waiter\profile-<exe name>`.
 - **Game PID:** `Get-CimInstance Win32_Process` filtered on the profile path in `CommandLine`, oldest first. Do not use the PID from `Start-Process`: Firefox starts through a launcher process that exits at once.
-- **Focus:** `GetForegroundWindow` + `GetWindowThreadProcessId` via `Add-Type`, saved to `%TEMP%\math_waiter.focus`; restored with `WScript.Shell.AppActivate(pid)`.
+- **Focus:** `GetForegroundWindow` + `GetWindowThreadProcessId` via `Add-Type`, saved as `<hwnd> <pid>` to `%TEMP%\math_waiter.focus-<session>`. Restore checks the handle still exists and belongs to that pid, then `SetForegroundWindow` with `AttachThreadInput` to the current foreground thread (Windows refuses foreground changes from background processes otherwise); if the window is gone or the switch fails, `WScript.Shell.AppActivate(pid)`. The exact window matters because Windows Terminal runs all its windows in one process.
 - **Close:** `CloseMainWindow()` + `WaitForExit(3000)`, then `taskkill /T /F`.
 - `$PROFILE` is an automatic variable; use `$ProfileDir`.
 

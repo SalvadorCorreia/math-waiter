@@ -100,20 +100,38 @@ game_pid() {
     esac 2> /dev/null
 }
 
-frontmost_pid() {
-    osascript -e 'tell application "System Events" to get unix id of first process whose frontmost is true' \
-        2> /dev/null
+# The frontmost app and its front window, as "pid<TAB>x<TAB>y<TAB>width<TAB>height<TAB>title".
+# AppleScript has no lasting window ID, so the window is found again by where it is and, failing
+# that, by its title. Without a window (or without permission to read it) only the pid is given.
+frontmost_window() {
+    osascript 2> /dev/null <<'APPLESCRIPT'
+tell application "System Events"
+    set p to first process whose frontmost is true
+    set out to (unix id of p) as text
+    try
+        set w to value of attribute "AXFocusedWindow" of p
+        set {x, y} to position of w
+        set {ww, hh} to size of w
+        set n to ""
+        try
+            set n to name of w as text
+        end try
+        set out to out & tab & x & tab & y & tab & ww & tab & hh & tab & n
+    end try
+    return out
+end tell
+APPLESCRIPT
 }
 
-# Remember the frontmost app (the one Claude Code runs in), so focus can return to it later.
-# Skipped when the frontmost app is the game itself.
+# Remember the frontmost window (the one Claude Code runs in), so focus can return to that window
+# rather than to whichever window of the same app happens to be in front. Skipped when it is the game.
 save_focus() {
-    local pid
-    pid=$(frontmost_pid)
-    [ -z "$pid" ] && return
-    [ "$pid" = "$(game_pid)" ] && return
+    local line
+    line=$(frontmost_window)
+    [ -z "$line" ] && return
+    [ "${line%%[[:space:]]*}" = "$(game_pid)" ] && return
     mkdir -p "$RUN_DIR"
-    echo "$pid" > "$FOCUS_FILE"
+    printf '%s\n' "$line" > "$FOCUS_FILE"
 }
 
 # Bring the app with the given process ID to front.
@@ -122,9 +140,53 @@ focus_pid() {
         > /dev/null 2>&1
 }
 
-# Return focus to the app saved by save_focus.
+# Bring the app to front and raise the window with the saved position and size, or else the saved
+# title. If neither is there any more, the app's own front window stays in front.
+focus_window() {
+    osascript - "$@" > /dev/null 2>&1 <<'APPLESCRIPT'
+on run argv
+    set pidNum to (item 1 of argv) as integer
+    set px to (item 2 of argv) as integer
+    set py to (item 3 of argv) as integer
+    set pw to (item 4 of argv) as integer
+    set ph to (item 5 of argv) as integer
+    set wantedName to ""
+    if (count of argv) > 5 then set wantedName to item 6 of argv
+    tell application "System Events"
+        set p to first process whose unix id is pidNum
+        set target to missing value
+        repeat with w in (windows of p)
+            if (position of w) is {px, py} and (size of w) is {pw, ph} then
+                set target to contents of w
+                exit repeat
+            end if
+        end repeat
+        if target is missing value and wantedName is not "" then
+            repeat with w in (windows of p)
+                if (name of w as text) is wantedName then
+                    set target to contents of w
+                    exit repeat
+                end if
+            end repeat
+        end if
+        set frontmost of p to true
+        if target is not missing value then perform action "AXRaise" of target
+    end tell
+end run
+APPLESCRIPT
+}
+
+# Return focus to the window saved by save_focus. A file from before 0.3.0 holds only a pid.
 restore_focus() {
-    [ -f "$FOCUS_FILE" ] && focus_pid "$(cat "$FOCUS_FILE")"
+    [ -f "$FOCUS_FILE" ] || return
+    local pid x y w h name
+    IFS="$(printf '\t')" read -r pid x y w h name < "$FOCUS_FILE"
+    [ -n "$pid" ] || return
+    if [ -n "$h" ]; then
+        focus_window "$pid" "$x" "$y" "$w" "$h" "$name"
+    else
+        focus_pid "$pid"
+    fi
 }
 
 # Send the game's browser process the same quit request as Cmd+Q, so it shuts down cleanly

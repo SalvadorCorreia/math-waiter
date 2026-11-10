@@ -100,23 +100,52 @@ function Get-GamePid {
 Add-Type -Namespace MathWaiter -Name Win32 -MemberDefinition @'
 [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
 [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint pid);
+[DllImport("user32.dll")] public static extern bool IsWindow(IntPtr hWnd);
+[DllImport("user32.dll")] public static extern bool IsIconic(IntPtr hWnd);
+[DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+[DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+[DllImport("user32.dll")] public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+[DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();
 '@
 
-# Remember the foreground app (the one Claude Code runs in), so focus can return to it later.
-# Skipped when the foreground app is the game itself.
+# Remember the foreground window (the one Claude Code runs in) as "<window handle> <pid>", so focus
+# returns to that window rather than to whichever window of the same app is in front: Windows
+# Terminal runs all its windows in one process. Skipped when the foreground app is the game itself.
 function Save-Focus {
     [uint32]$FocusPid = 0
-    [void][MathWaiter.Win32]::GetWindowThreadProcessId([MathWaiter.Win32]::GetForegroundWindow(), [ref]$FocusPid)
-    if ($FocusPid -and $FocusPid -ne (Get-GamePid)) { $FocusPid | Set-Content $FocusFile }
+    $Window = [MathWaiter.Win32]::GetForegroundWindow()
+    [void][MathWaiter.Win32]::GetWindowThreadProcessId($Window, [ref]$FocusPid)
+    if ($FocusPid -and $FocusPid -ne (Get-GamePid)) { "$($Window.ToInt64()) $FocusPid" | Set-Content $FocusFile }
 }
 
 function Set-FocusPid($ProcessId) {
     (New-Object -ComObject WScript.Shell).AppActivate([int]$ProcessId) | Out-Null
 }
 
-# Return focus to the app saved by Save-Focus.
+# Windows only lets the foreground app hand the foreground on, so this borrows its input queue
+# for the moment of the switch. Returns whether the window ended up in front.
+function Set-FocusWindow([IntPtr]$Window) {
+    if ([MathWaiter.Win32]::IsIconic($Window)) { [void][MathWaiter.Win32]::ShowWindow($Window, 9) } # SW_RESTORE
+    [uint32]$Ignored = 0
+    $ForegroundThread = [MathWaiter.Win32]::GetWindowThreadProcessId([MathWaiter.Win32]::GetForegroundWindow(), [ref]$Ignored)
+    $OwnThread = [MathWaiter.Win32]::GetCurrentThreadId()
+    $Attached = $ForegroundThread -and $ForegroundThread -ne $OwnThread -and [MathWaiter.Win32]::AttachThreadInput($OwnThread, $ForegroundThread, $true)
+    [void][MathWaiter.Win32]::SetForegroundWindow($Window)
+    if ($Attached) { [void][MathWaiter.Win32]::AttachThreadInput($OwnThread, $ForegroundThread, $false) }
+    [MathWaiter.Win32]::GetForegroundWindow() -eq $Window
+}
+
+# Return focus to the window saved by Save-Focus, or to its app when that window has closed (or its
+# handle now belongs to another app). A file from before 0.3.0 holds only a pid.
 function Restore-Focus {
-    if (Test-Path $FocusFile) { Set-FocusPid (Get-Content $FocusFile) }
+    if (-not (Test-Path $FocusFile)) { return }
+    $Parts = @((Get-Content $FocusFile -Raw).Trim() -split '\s+')
+    if ($Parts.Count -lt 2) { Set-FocusPid $Parts[0]; return }
+    $Window = [IntPtr][int64]$Parts[0]
+    [uint32]$WindowPid = 0
+    if ([MathWaiter.Win32]::IsWindow($Window)) { [void][MathWaiter.Win32]::GetWindowThreadProcessId($Window, [ref]$WindowPid) }
+    if ($WindowPid -eq [uint32]$Parts[1] -and (Set-FocusWindow $Window)) { return }
+    Set-FocusPid $Parts[1]
 }
 
 # Close the game window normally, so the browser shuts down cleanly, and force it only if it has

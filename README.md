@@ -49,7 +49,7 @@ The hooks run as shell commands with your user permissions, so here is everythin
 * **Closing the game:** the scripts ask the game window to close, and force-kill it after 3 seconds if it is still open. They find it by its profile path, so other browser windows are not affected.
 * **Files written:** your on/off settings in `~/.config/math-waiter`, the browser profile (including Firefox settings from `scripts/firefox/`) a small record of each conversation's focused window and whether it is working, all in the per-user folders listed under [Per-platform notes](#per-platform-notes) or in temporary storage.
 
-`start_game` remembers the window you submitted the prompt from, per conversation, and `pause_game` / `stop_game` return focus to it.
+`start_game` remembers the window you submitted the prompt from, per conversation, and `pause_game` / `stop_game` return focus to that window. On macOS the window is recognised by its position, size and title, since macOS scripts cannot keep a window ID. Conversations in tabs of one window, or in the Claude desktop app, get that window back, showing whichever tab or conversation is selected.
 
 ## Browser
 
