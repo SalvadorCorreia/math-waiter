@@ -1,30 +1,3 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-  <rect width="1024" height="1024" rx="200" fill="#1e1e2e"/>
-  <g fill="none" stroke="#cdd6f4" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
-    <!-- hourglass: top cap and upper bulb -->
-    <path d="M272 140H752"/>
-    <path d="M322 140C322 290 462 350 476 462"/>
-    <path d="M702 140C702 290 562 350 548 462"/>
-    <!-- neck flaring into the abacus frame -->
-    <path d="M476 462C468 510 400 548 322 580"/>
-    <path d="M548 462C556 510 624 548 702 580"/>
-    <!-- abacus frame -->
-    <rect x="232" y="580" width="560" height="310" rx="30"/>
-    <!-- rods -->
-    <g stroke-width="18">
-      <path d="M232 657H792"/>
-      <path d="M232 735H792"/>
-      <path d="M232 813H792"/>
-    </g>
-  </g>
-  <!-- sand: remaining heap and falling grains -->
-  <path d="M412 262Q512 296 612 262C578 318 528 352 512 408C496 352 446 318 412 262Z" fill="none" stroke="#f9e2af" stroke-width="22" stroke-linejoin="round"/>
-  <circle cx="512" cy="478" r="13" fill="#f9e2af"/>
-  <circle cx="512" cy="532" r="13" fill="#f9e2af"/>
-  <!-- beads: the grain lands as a bead -->
-  <g fill="#1e1e2e" stroke="#f9e2af" stroke-width="18">
-    <circle cx="300" cy="657" r="24"/><circle cx="512" cy="657" r="24"/><circle cx="724" cy="657" r="24"/>
-    <circle cx="300" cy="735" r="24"/><circle cx="368" cy="735" r="24"/><circle cx="724" cy="735" r="24"/>
-    <circle cx="300" cy="813" r="24"/><circle cx="656" cy="813" r="24"/><circle cx="724" cy="813" r="24"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Math Waiter: the waiter mascot on light rays, with + − × ÷ in the corners. -->
+<defs><linearGradient id="bgt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7aa4f8"/><stop offset="1" stop-color="#4f78e6"/></linearGradient><clipPath id="clip"><rect width="64" height="64" rx="14"/></clipPath></defs><rect width="64" height="64" rx="14" fill="url(#bgt)"/><g clip-path="url(#clip)"><path d="M32 32 L92.0 32.0 L90.0 47.5 Z" fill="#fff" opacity="0.12"/><path d="M32 32 L84.0 62.0 L74.4 74.4 Z" fill="#fff" opacity="0.12"/><path d="M32 32 L62.0 84.0 L47.5 90.0 Z" fill="#fff" opacity="0.12"/><path d="M32 32 L32.0 92.0 L16.5 90.0 Z" fill="#fff" opacity="0.12"/><path d="M32 32 L2.0 84.0 L-10.4 74.4 Z" fill="#fff" opacity="0.12"/><path d="M32 32 L-20.0 62.0 L-26.0 47.5 Z" fill="#fff" opacity="0.12"/><path d="M32 32 L-28.0 32.0 L-26.0 16.5 Z" fill="#fff" opacity="0.12"/><path d="M32 32 L-20.0 2.0 L-10.4 -10.4 Z" fill="#fff" opacity="0.12"/><path d="M32 32 L2.0 -20.0 L16.5 -26.0 Z" fill="#fff" opacity="0.12"/><path d="M32 32 L32.0 -28.0 L47.5 -26.0 Z" fill="#fff" opacity="0.12"/><path d="M32 32 L62.0 -20.0 L74.4 -10.4 Z" fill="#fff" opacity="0.12"/><path d="M32 32 L84.0 2.0 L90.0 16.5 Z" fill="#fff" opacity="0.12"/></g><path d="M10.5 7.3 V13.7 M7.3 10.5 H13.7" stroke="#ffe9a8" stroke-width="2.6" stroke-linecap="round"/><path d="M50.3 10.5 H56.7" stroke="#ffe9a8" stroke-width="2.6" stroke-linecap="round"/><path d="M8.004 51.004 L12.996 55.996 M12.996 51.004 L8.004 55.996" stroke="#ffe9a8" stroke-width="2.6" stroke-linecap="round"/><path d="M50.3 53.5 H56.7" stroke="#ffe9a8" stroke-width="2.6" stroke-linecap="round"/><circle cx="53.5" cy="50.14" r="1.612" fill="#ffe9a8"/><circle cx="53.5" cy="56.86" r="1.612" fill="#ffe9a8"/><ellipse cx="32" cy="33" rx="19" ry="17" fill="#fff"/><circle cx="25" cy="31" r="2.6" fill="#1e1e2e"/><circle cx="39" cy="31" r="2.6" fill="#1e1e2e"/><path d="M27.5 37 Q32 41 36.5 37" stroke="#1e1e2e" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M24 50 L32 53 L40 50 L40 56 L32 53 L24 56 Z" fill="#1e1e2e" stroke="#1e1e2e" stroke-width="1.5" stroke-linejoin="round"/></svg>
