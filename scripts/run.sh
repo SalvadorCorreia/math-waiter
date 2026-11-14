@@ -1,13 +1,13 @@
 #!/bin/sh
-# Entry point for the plugin's hooks and commands: runs <action>_game for this OS.
-# Usage: run.sh start|pause|stop|end|account|profile|status
+# Entry point for the plugin's hooks and skills: runs <action>_game for this OS.
+# Usage: run.sh start|pause|stop|end|refresh|account|profile|status
 #
 # Hook commands run through sh on macOS and Linux and through Git Bash on Windows,
 # so one POSIX sh script can pick the right folder everywhere. The on/off settings live here
 # for the same reason: one implementation for every OS.
 
 case "$1" in
-    start | pause | stop | end | account | profile | status) ;;
+    start | pause | stop | end | refresh | account | profile | status) ;;
     *) exit 0 ;;
 esac
 
@@ -20,6 +20,9 @@ STATUS_FILE="$CONFIG_DIR/status"
 WORKING_DIR="${TMPDIR:-/tmp}/math-waiter-$(id -u)/working"
 # A conversation that crashed or was killed never finishes, so its mark stops counting after 3 hours.
 WORKING_MAX_MINUTES=180
+# Antigravity runs no hook when the player interrupts it or closes the conversation. Its marks hold
+# the agent's name, are refreshed on every model call, and stop counting after 15 minutes without one.
+REFRESHED_MAX_MINUTES=15
 
 run_os() {
     case "$(uname -s)" in
@@ -68,12 +71,13 @@ esac
 INPUT=""
 [ -t 0 ] || INPUT=$(cat)
 SESSION=$(printf '%s' "$INPUT" | sed -n 's/.*"session_id" *: *"\([A-Za-z0-9_-]*\)".*/\1/p' | head -n 1)
-[ -n "$SESSION" ] || { [ "$1" = end ] || run_os "$1" > /dev/null 2>&1; exit 0; }
+[ -n "$SESSION" ] || { case "$1" in end | refresh) ;; *) run_os "$1" > /dev/null 2>&1 ;; esac; exit 0; }
 # Each conversation remembers its own terminal window, so focus goes back to the right one.
 export MATH_WAITER_SESSION="$SESSION"
 
 others_working() {
     find "$WORKING_DIR" -type f -mmin +$WORKING_MAX_MINUTES -exec rm -f {} + 2> /dev/null
+    find "$WORKING_DIR" -type f -size +0c -mmin +$REFRESHED_MAX_MINUTES -exec rm -f {} + 2> /dev/null
     [ -n "$(ls -A "$WORKING_DIR" 2> /dev/null)" ]
 }
 
@@ -83,6 +87,12 @@ finish() {
     rm -f "$WORKING_DIR/$SESSION"
     if others_working; then run_os pause; else run_os stop; fi > /dev/null 2>&1
 }
+
+# The agent is still working on this turn (Antigravity, before every model call after the first).
+if [ "$1" = refresh ]; then
+    [ -f "$WORKING_DIR/$SESSION" ] && touch "$WORKING_DIR/$SESSION"
+    exit 0
+fi
 
 # Stop does not run when the player interrupts Claude, nor when the conversation is closed mid-turn.
 # The idle notification (a minute after Claude is left waiting) and SessionEnd catch those turns.
@@ -110,7 +120,8 @@ fi
 
 [ "$(session_mode)" = on ] || exit 0
 case "$1" in
-    start) mkdir -p "$WORKING_DIR" && touch "$WORKING_DIR/$SESSION"
+    start) # Empty for Claude Code; agents that set MATH_WAITER_AGENT refresh their mark (see above).
+           mkdir -p "$WORKING_DIR" && printf '%s' "${MATH_WAITER_AGENT:-}" > "$WORKING_DIR/$SESSION"
            run_os start > /dev/null 2>&1 ;;
     pause) # Refreshed, so a long turn that keeps asking for permission is not taken for a crashed one.
            [ -f "$WORKING_DIR/$SESSION" ] && touch "$WORKING_DIR/$SESSION"

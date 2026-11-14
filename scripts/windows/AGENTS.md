@@ -7,6 +7,7 @@ PowerShell (Windows PowerShell 5.1 compatible). `common.ps1` is dot-sourced by t
 ## Specifics
 
 - **How they run:** Claude Code runs hooks through Git Bash on Windows, so `../run.sh` calls `powershell.exe -NoProfile -ExecutionPolicy Bypass -File`. Without Git for Windows the hook runs in PowerShell and the game does not start.
+- **Antigravity:** runs hooks through `cmd.exe`, so `../../hooks.json` falls back to `antigravity.ps1` when `sh` is not on PATH. It finds Git's `sh.exe` (next to `git.exe` on PATH, or under Program Files / LocalAppData) and pipes the hook input to `../antigravity.sh`.
 - **Default browser:** `HKCU\...\UrlAssociations\https\UserChoice` ProgId, then `HKEY_CLASSES_ROOT\<ProgId>\shell\open\command`.
 - **Profiles:** `%LOCALAPPDATA%\math-waiter\profile-<exe name>`.
 - **Game PID:** `Get-CimInstance Win32_Process` filtered on the profile path in `CommandLine`, oldest first. Do not use the PID from `Start-Process`: Firefox starts through a launcher process that exits at once.

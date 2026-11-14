@@ -1,8 +1,10 @@
 # Math Waiter
 
-A math game that keeps you busy while Claude Code works. Claude Code hooks open [mathwaiter.tech](https://mathwaiter.tech) in a browser window when you submit a prompt, hand focus back to Claude when it needs your input, and close the game when Claude finishes. Your current run is saved, so it continues the next time the game opens. The game needs an internet connection.
+A math game that keeps you busy while Claude Code or Antigravity works. The agent's hooks open [mathwaiter.tech](https://mathwaiter.tech) in a browser window when you submit a prompt, hand focus back to the agent when it needs your input, and close the game when the agent finishes. Your current run is saved, so it continues the next time the game opens. The game needs an internet connection.
 
 ## How it works
+
+### In Claude Code
 
 | Event | Script | Effect |
 |---|---|---|
@@ -10,15 +12,32 @@ A math game that keeps you busy while Claude Code works. Claude Code hooks open 
 | `Notification` (`permission_prompt`) | `pause_game` | Brings Claude back to front. The game's timer pauses itself when its window loses focus. |
 | `Stop`, `StopFailure` | `stop_game` | Closes the game window and brings Claude back to front |
 | `Notification` (`idle_prompt`), `SessionEnd` | `stop_game` | Only for a turn that ended without `Stop` (you interrupted Claude, or closed the conversation mid-turn): same as `Stop`. Claude Code runs no hook on an interrupt itself, and the scripts never read your conversation to spot one, so where these do not fire (seen in the desktop app on Windows) the game stays open until your next prompt finishes |
-| `/math-waiter:login`, `/math-waiter:profile` commands | `account_game` | Opens the game window on the sign-in or profile page and keeps it open past that turn |
+| `/math-waiter:login`, `/math-waiter:profile` | `account_game` | Opens the game window on the sign-in or profile page and keeps it open past that turn |
+
+### In Antigravity
+
+Antigravity (the `agy` CLI and the Antigravity app) has different hook events, so `scripts/antigravity.sh` maps them onto the same scripts:
+
+| Event | Effect |
+|---|---|
+| `PreInvocation`, first model call of a turn | `start_game`: opens the game or brings it to front. Later model calls of the turn only note that the agent is still working |
+| `PreToolUse` on `ask_question` | `pause_game`: the agent is asking you something. The hook allows that tool, which needs no permission anyway |
+| `Stop` | `stop_game`: closes the game and brings the agent back to front |
+
+Antigravity has no hook for permission prompts, interrupts or closing a conversation, so:
+
+* When the agent waits for your approval of a command or file edit, the game stays in front. In Auto mode it rarely asks.
+* When you interrupt the agent (Esc) or close the conversation mid-turn, the game stays open until your next prompt finishes. Until 15 minutes after that conversation's last model call, another conversation finishing leaves the game open too, as if it were still working.
+
+The `/math-waiter:` commands below work in Antigravity too: its hook applies them before the agent runs, and opens the window for `login` and `profile`.
 
 The game runs in its own window with a separate browser profile, so closing it never touches your normal browser windows. The profile also keeps you signed in.
 
-**Several conversations at once** share one game window. It closes only when the last working conversation finishes; when another one finishes first, focus goes back to that conversation's window and the game stays open. Each conversation leaves an empty file in temporary storage while it works; one older than 3 hours (a conversation that crashed) no longer counts.
+**Several conversations at once** share one game window. It closes only when the last working conversation finishes; when another one finishes first, focus goes back to that conversation's window and the game stays open. Each conversation leaves a small file in temporary storage while it works; one older than 3 hours (a conversation that crashed) no longer counts.
 
 ## Turning it on and off
 
-Type these in Claude Code:
+Type these in Claude Code or Antigravity:
 
 | Command | What it does |
 |---|---|
@@ -34,8 +53,8 @@ A conversation you switched keeps its choice; the others follow the default. The
 
 You can play without an account. An account keeps your scores across devices and puts your name on room leaderboards. You can sign in with Google, or with an email and password.
 
-* **In the game window**, which is what the plugin opens: run `/math-waiter:login` in Claude Code. The game window opens on its sign-in screen, where you can sign in or create an account, and it stays open until your next prompt finishes. `/math-waiter:profile` opens it on your profile instead, to change your name, avatar, sound or difficulty. The game window uses its own browser profile, so sign in there once even if you are already signed in in your normal browser.
-* **In your normal browser**: go to [mathwaiter.tech/account](https://mathwaiter.tech/account). This also works to play without Claude Code, at [mathwaiter.tech/play](https://mathwaiter.tech/play).
+* **In the game window**, which is what the plugin opens: run `/math-waiter:login` in Claude Code or Antigravity. The game window opens on its sign-in screen, where you can sign in or create an account, and it stays open until your next prompt finishes. `/math-waiter:profile` opens it on your profile instead, to change your name, avatar, sound or difficulty. The game window uses its own browser profile, so sign in there once even if you are already signed in in your normal browser.
+* **In your normal browser**: go to [mathwaiter.tech/account](https://mathwaiter.tech/account). This also works to play without an agent, at [mathwaiter.tech/play](https://mathwaiter.tech/play).
 
 Creating an account with email sends one email to confirm the address. After that, signing in sends no email.
 
@@ -49,7 +68,7 @@ The hooks run as shell commands with your user permissions, so here is everythin
 * **Closing the game:** the scripts ask the game window to close, and force-kill it after 3 seconds if it is still open. They find it by its profile path, so other browser windows are not affected.
 * **Files written:** your on/off settings in `~/.config/math-waiter`, the browser profile (including Firefox settings from `scripts/firefox/`) a small record of each conversation's focused window and whether it is working, all in the per-user folders listed under [Per-platform notes](#per-platform-notes) or in temporary storage.
 
-`start_game` remembers the window you submitted the prompt from, per conversation, and `pause_game` / `stop_game` return focus to that window. On macOS the window is recognised by its position, size and title, since macOS scripts cannot keep a window ID. Conversations in tabs of one window, or in the Claude desktop app, get that window back, showing whichever tab or conversation is selected.
+`start_game` remembers the window you submitted the prompt from, per conversation, and `pause_game` / `stop_game` return focus to that window. On macOS the window is recognised by its position, size and title, since macOS scripts cannot keep a window ID. Conversations in tabs of one window, or in the Claude desktop or Antigravity app, get that window back, showing whichever tab or conversation is selected.
 
 ## Browser
 
@@ -63,7 +82,7 @@ Each browser gets its own game profile, so after switching your default browser 
 
 ## Installation
 
-Math Waiter is a Claude Code plugin. Its hooks run in every Claude Code session: the terminal CLI, the desktop app and the IDE extensions.
+Math Waiter is a Claude Code plugin and an Antigravity plugin. In Claude Code its hooks run in every session: the terminal CLI, the desktop app and the IDE extensions. For Antigravity, see [below](#antigravity).
 
 From GitHub, inside Claude Code:
 
@@ -85,13 +104,23 @@ To try it for one session without installing: `claude --plugin-dir /path/to/math
 
 To turn it off: `/plugin disable math-waiter@math-waiter`, or `/plugin uninstall math-waiter@math-waiter` to remove it.
 
+### Antigravity
+
+The same folder is an Antigravity plugin. One install covers the `agy` CLI and the Antigravity app, which share `~/.gemini/config/plugins`. In a shell:
+
+```bash
+agy plugin install https://github.com/SalvadorCorreia/math-waiter
+```
+
+or `agy plugin install /path/to/math-waiter` from a local copy. Then start a new `agy` session, or restart the Antigravity app. To update, run the install command again. To turn it off: `agy plugin disable math-waiter`, or `agy plugin uninstall math-waiter` to remove it.
+
 ### Updates
 
 Updates ship through the same marketplace. Bump `version` in `.claude-plugin/plugin.json` and push; users get the new version with `/plugin marketplace update math-waiter`, or automatically if they turned on auto-update for the marketplace.
 
 ### Per-platform notes
 
-* **Windows:** needs [Git for Windows](https://git-scm.com/download/win), which Claude Code uses to run hooks. Without it Claude Code runs hooks in PowerShell, and the game does not start. Profiles live in `%LOCALAPPDATA%\math-waiter`.
+* **Windows:** needs [Git for Windows](https://git-scm.com/download/win), which Claude Code uses to run hooks. Without it Claude Code runs hooks in PowerShell, and the game does not start. Antigravity runs hooks in `cmd.exe`, where `scripts/windows/antigravity.ps1` finds Git's `sh.exe`. Profiles live in `%LOCALAPPDATA%\math-waiter`.
 * **macOS:** the first run may ask for permission to control "System Events". Click **Allow**. If you dismissed it, enable it in System Settings → Privacy & Security → Automation / Accessibility. Profiles live in `~/Library/Application Support/math-waiter`.
 * **Linux:** profiles live in `~/.local/state/math-waiter`, or inside the browser's snap folder for snap browsers. Linux has no standard way to switch or close windows, so focus switching works on Hyprland, Sway (needs `jq`) and X11 (needs `xdotool`, or `wmctrl` + `xprop`). On other desktops, such as GNOME or KDE on Wayland, the game still opens, pauses on blur and closes; you switch windows yourself. There, a Firefox game window is closed with `SIGTERM`. Flatpak browsers are not supported.
 
@@ -99,10 +128,13 @@ Updates ship through the same marketplace. Bump `version` in `.claude-plugin/plu
 
 ```
 .claude-plugin/       plugin.json (the plugin), marketplace.json (lets people install it) and the plugin icon
+.antigravity-plugin/  plugin.json for Antigravity
 assets/               editable source of the plugin icon
-hooks/hooks.json      the three hooks; each runs scripts/run.sh <start|pause|stop>
-commands/             /math-waiter:login, :on, :off, :default and :status
+hooks/hooks.json      Claude Code's hooks; each runs scripts/run.sh <start|pause|stop|end>
+hooks.json            Antigravity's hooks; each runs scripts/antigravity.sh <start|pause|stop>
+skills/               /math-waiter:login, :profile, :on, :off, :default and :status, for both agents
 scripts/run.sh        picks the scripts for the current OS
+scripts/antigravity.sh  turns Antigravity's hook events into run.sh actions
 scripts/windows/      PowerShell scripts
 scripts/macos/        bash + osascript scripts
 scripts/linux/        bash scripts
@@ -118,4 +150,4 @@ Each OS folder has `start_game`, `pause_game`, `stop_game` and `account_game`, p
 
 ## License and affiliation
 
-MIT, see [LICENSE](LICENSE). Math Waiter is an independent project. It works with Claude Code but is not affiliated with or endorsed by Anthropic.
+MIT, see [LICENSE](LICENSE). Math Waiter is an independent project. It works with Claude Code and Antigravity but is not affiliated with or endorsed by Anthropic or Google.

@@ -1,0 +1,13 @@
+{
+  "name": "math-waiter",
+  "displayName": "Math Waiter",
+  "version": "0.3.2",
+  "description": "A math game that opens while the Antigravity agent works, steps aside when it asks you something, and closes when it finishes.",
+  "author": {
+    "name": "Salvador Correia"
+  },
+  "homepage": "https://mathwaiter.tech",
+  "license": "MIT",
+  "repository": "https://github.com/SalvadorCorreia/math-waiter",
+  "logo": "assets/icon-source.svg"
+}

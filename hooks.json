@@ -1,0 +1,30 @@
+{
+  "math-waiter": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "sh ./scripts/antigravity.sh start || powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/antigravity.ps1 start",
+        "timeout": 15
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^ask_question$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh ./scripts/antigravity.sh pause || powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/antigravity.ps1 pause",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "sh ./scripts/antigravity.sh stop || powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/antigravity.ps1 stop",
+        "timeout": 15
+      }
+    ]
+  }
+}
